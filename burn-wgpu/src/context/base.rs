@@ -2,9 +2,9 @@ use super::client::ContextClient;
 use crate::{
     context::server::ContextServer,
     kernel::{DynamicKernel, StaticKernel},
-    tune::Tuner,
     GraphicsApi, WgpuDevice,
 };
+
 use burn_common::id::IdGenerator;
 use spin::Mutex;
 use std::{any::TypeId, borrow::Cow, collections::HashMap, sync::Arc};
@@ -32,10 +32,14 @@ pub struct Context {
     device_wgpu: Arc<wgpu::Device>,
     cache: Mutex<HashMap<TemplateKey, Arc<ComputePipeline>>>,
     client: ContextClientImpl,
-    pub(crate) tuner: Tuner,
+    #[cfg(feature = "autotune")]
+    pub(crate) tuner: tune::Tuner,
     pub(crate) device: WgpuDevice,
     pub(crate) info: wgpu::AdapterInfo,
 }
+
+unsafe impl Send for Context {}
+unsafe impl Sync for Context {}
 
 #[derive(Debug, Hash, PartialOrd, PartialEq, Eq)]
 enum TemplateKey {
@@ -71,7 +75,8 @@ impl Context {
             device,
             client,
             cache: Mutex::new(HashMap::new()),
-            tuner: Tuner::new(),
+            #[cfg(feature = "autotune")]
+            tuner: crate::Tuner::new(),
             info,
         }
     }
@@ -231,7 +236,7 @@ impl PartialEq for Context {
 async fn select_device<G: GraphicsApi>(
     device: &WgpuDevice,
 ) -> (wgpu::Device, wgpu::Queue, wgpu::AdapterInfo) {
-    let adapter = select_adapter::<G>(device);
+    let adapter = select_adapter::<G>(device).await;
     let limits = adapter.limits();
 
     let (device, queue) = adapter
@@ -256,12 +261,35 @@ async fn select_device<G: GraphicsApi>(
     (device, queue, adapter.get_info())
 }
 
-fn select_adapter<G: GraphicsApi>(device: &WgpuDevice) -> wgpu::Adapter {
+async fn select_adapter<G: GraphicsApi>(device: &WgpuDevice) -> wgpu::Adapter {
     let instance = wgpu::Instance::default();
 
     let mut adapters_other = Vec::new();
     let mut adapters = Vec::new();
 
+    #[cfg(target_arch = "wasm32")]
+    {
+        let power_preference = match device {
+            WgpuDevice::DiscreteGpu(_) => wgpu::PowerPreference::HighPerformance,
+            WgpuDevice::IntegratedGpu(_) => wgpu::PowerPreference::LowPower,
+            WgpuDevice::VirtualGpu(_) => wgpu::PowerPreference::None,
+            WgpuDevice::Cpu => wgpu::PowerPreference::None,
+            WgpuDevice::BestAvailable => wgpu::PowerPreference::HighPerformance,
+        };
+
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptionsBase {
+                power_preference,
+                ..Default::default()
+            })
+            .await;
+
+        if let Some(adapter) = adapter {
+            adapters.push(adapter);
+        }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
     instance
         .enumerate_adapters(G::backend().into())
         .for_each(|adapter| {

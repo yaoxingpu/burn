@@ -13,6 +13,8 @@ pub struct Mutex<T> {
     inner: MutexImported<T>,
 }
 
+unsafe impl<T: Sync> Sync for Mutex<T> {}
+
 impl<T> Mutex<T> {
     /// Creates a new mutex in an unlocked state ready for use.
     #[inline(always)]

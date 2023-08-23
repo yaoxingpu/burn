@@ -14,6 +14,9 @@ pub struct WgpuTensor<E: WgpuElement, const D: usize> {
     elem: PhantomData<E>,
 }
 
+unsafe impl<E: WgpuElement, const D: usize> Send for WgpuTensor<E, D> {}
+unsafe impl<E: WgpuElement, const D: usize> Sync for WgpuTensor<E, D> {}
+
 #[derive(Debug, Clone)]
 pub struct WgpuTensorDyn<E: WgpuElement> {
     pub(crate) context: Arc<Context>,

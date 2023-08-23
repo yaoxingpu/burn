@@ -16,6 +16,8 @@ pub(crate) mod context;
 pub(crate) mod element;
 pub(crate) mod pool;
 pub(crate) mod tensor;
+
+#[cfg(feature = "autotune")]
 pub(crate) mod tune;
 
 mod device;

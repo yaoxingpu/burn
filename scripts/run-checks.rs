@@ -190,6 +190,7 @@ fn no_std_checks() {
 
     // Run checks for the following crates
     build_and_test_no_std("burn");
+    build_and_test_no_std("burn-wgpu");
     build_and_test_no_std("burn-core");
     build_and_test_no_std("burn-common");
     build_and_test_no_std("burn-tensor");

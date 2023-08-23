@@ -4,8 +4,10 @@ use burn::record::BinBytesRecorder;
 use burn::record::FullPrecisionSettings;
 use burn::record::Recorder;
 use burn_ndarray::NdArrayBackend;
+use burn_wgpu::WgpuBackend;
 
-pub type Backend = NdArrayBackend<f32>;
+pub type Backend = WgpuBackend<burn_wgpu::AutoGraphicsApi, f32, i32>;
+// pub type Backend = NdArrayBackend<f32>;
 
 static STATE_ENCODED: &[u8] = include_bytes!("../model.bin");
 

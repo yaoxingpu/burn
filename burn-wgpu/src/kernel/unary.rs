@@ -105,7 +105,7 @@ pub fn unary_default<K: StaticKernelSource, E: WgpuElement, const D: usize>(
 pub fn unary_inplace_default<K: StaticKernelSource, E: WgpuElement, const D: usize>(
     input: WgpuTensor<E, D>,
 ) -> WgpuTensor<E, D> {
-    unary_inplace::<K, E, D, 32>(input)
+    unary_inplace::<K, E, D, 16>(input)
 }
 
 /// Execute a unary inplace kernel using the provided WORKGROUP.

@@ -108,7 +108,7 @@ pub fn unary_scalar_default<K: StaticKernelSource, E: WgpuElement, const D: usiz
     lhs: WgpuTensor<E, D>,
     scalar: E,
 ) -> WgpuTensor<E, D> {
-    unary_scalar::<K, E, D, 32>(lhs, scalar)
+    unary_scalar::<K, E, D, 16>(lhs, scalar)
 }
 
 /// Execute a unary scalar kernel using the provided WORKGROUP.
@@ -142,7 +142,7 @@ pub fn unary_scalar_inplace_default<K: StaticKernelSource, E: WgpuElement, const
     lhs: WgpuTensor<E, D>,
     scalar: E,
 ) -> WgpuTensor<E, D> {
-    unary_scalar_inplace::<K, E, D, 32>(lhs, scalar)
+    unary_scalar_inplace::<K, E, D, 16>(lhs, scalar)
 }
 
 /// Execute a unary scalar inplace kernel using the provided WORKGROUP.

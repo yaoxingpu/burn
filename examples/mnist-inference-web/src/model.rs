@@ -47,7 +47,7 @@ impl<B: Backend> Model<B> {
         }
     }
 
-    pub fn forward(&self, input: Tensor<B, 3>) -> Tensor<B, 2> {
+    pub async fn forward(&self, input: Tensor<B, 3>) -> Tensor<B, 2> {
         let [batch_size, height, width] = input.dims();
 
         let x = input.reshape([batch_size, 1, height, width]).detach();
@@ -62,7 +62,9 @@ impl<B: Backend> Model<B> {
         let x = self.fc1.forward(x);
         let x = self.activation.forward(x);
 
-        self.fc2.forward(x)
+        let x = self.fc2.forward(x);
+        log::info!("{:?}", x.to_data().await);
+        x
     }
 }
 

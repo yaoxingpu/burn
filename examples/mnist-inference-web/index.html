@@ -132,6 +132,7 @@
             console.log(mnist);
             console.log(data);
             const output = await mnist.inference(data);
+            console.log(output);
             chart.data.datasets[0].data = output;
             chart.update();
             isTimeOutSet = false;

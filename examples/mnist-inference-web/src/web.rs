@@ -58,16 +58,16 @@ impl Mnist {
         let input = ((input / 255) - 0.1307) / 0.3081;
 
         // Run the tensor input through the model
-        let output: Tensor<Backend, 2> = model.forward(input);
+        let output: Tensor<Backend, 2> = model.forward(input).await;
 
         // Convert the model output into probability distribution using softmax formula
-        let output: Tensor<Backend, 2> = output.clone().exp() / output.exp().sum_dim(1);
+        let output = burn::tensor::activation::softmax(output, 1);
 
         // Flatten output tensor with [1, 10] shape into boxed slice of [f32]
-        let output = output.into_data().await.convert::<f32>().value;
-        let array = Array::new_with_length(output.len() as u32);
+        let output = output.into_data().await.convert::<f64>().value;
+        let array = Array::new();
         for value in output {
-            array.push(&value.into());
+            array.push(&JsValue::from_f64(value));
         }
 
         Ok(array)

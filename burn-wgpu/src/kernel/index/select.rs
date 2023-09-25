@@ -18,7 +18,7 @@ pub(crate) fn select<E: WgpuElement, I: WgpuElement, const D: usize>(
     dim: usize,
     indices: WgpuTensor<I, 1>,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let mut output_shape = tensor.shape.clone();
     output_shape.dims[dim] = indices.shape.dims[0];
@@ -53,7 +53,7 @@ pub(crate) fn select_assign<E: WgpuElement, I: WgpuElement, const D: usize>(
     indices: WgpuTensor<I, 1>,
     value: WgpuTensor<E, D>,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let tensor = match tensor.can_mut() {
         true => tensor,

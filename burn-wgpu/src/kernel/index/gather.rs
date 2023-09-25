@@ -14,7 +14,7 @@ pub(crate) fn gather<E: WgpuElement, I: WgpuElement, const D: usize>(
     tensor: WgpuTensor<E, D>,
     indices: WgpuTensor<I, D>,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let shape_output = indices.shape.clone();
     let num_elems = shape_output.num_elements();

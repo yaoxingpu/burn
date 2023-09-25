@@ -28,7 +28,7 @@ pub(crate) fn max_pool2d<E: WgpuElement>(
     padding: [usize; 2],
     dilation: [usize; 2],
 ) -> WgpuTensor<E, 4> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let (info_handle, output) =
         build_output_and_info_pool2d(&x, kernel_size, stride, padding, dilation);
@@ -49,7 +49,7 @@ pub(crate) fn max_pool2d_with_indices<E: WgpuElement, I: WgpuElement>(
     padding: [usize; 2],
     dilation: [usize; 2],
 ) -> (WgpuTensor<E, 4>, WgpuTensor<I, 4>) {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let (info_handle, output) =
         build_output_and_info_pool2d(&x, kernel_size, stride, padding, dilation);
@@ -76,7 +76,7 @@ pub(crate) fn max_pool2d_with_indices_backward<E: WgpuElement, I: WgpuElement>(
     padding: [usize; 2],
     dilation: [usize; 2],
 ) -> WgpuTensor<E, 4> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let grad = kernel::into_contiguous(grad);
     let indices = kernel::into_contiguous(indices);

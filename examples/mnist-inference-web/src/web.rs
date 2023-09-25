@@ -25,6 +25,7 @@ impl Mnist {
     /// Constructor called by JavaScripts with the new keyword.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
+        wasm_logger::init(wasm_logger::Config::default());
         Self { model: None }
     }
 

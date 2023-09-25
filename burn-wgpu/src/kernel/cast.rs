@@ -30,7 +30,7 @@ pub fn cast<InputElem: WgpuElement, OutputElem: WgpuElement, const D: usize>(
         return WgpuTensor::new(tensor.client, tensor.device, tensor.shape, tensor.handle);
     }
 
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let num_elems = tensor.shape.num_elements();
     let kernel = StaticKernel::<

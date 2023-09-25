@@ -32,7 +32,7 @@ pub fn random_uniform<G: GraphicsApi, E: WgpuElement, const D: usize>(
     low: E,
     high: E,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
     const N_VALUES_PER_THREAD: usize = 128;
 
     let client = compute_client::<G>(device);

@@ -34,7 +34,7 @@ pub fn random_bernoulli<G: GraphicsApi, E: WgpuElement, const D: usize>(
     device: &WgpuDevice,
     prob: E,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
     const N_VALUES_PER_THREAD: usize = 128;
 
     let client = compute_client::<G>(device);

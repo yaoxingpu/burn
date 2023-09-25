@@ -66,7 +66,7 @@ pub fn comparison<K: StaticKernelSource, E: WgpuElement, const D: usize>(
     rhs: WgpuTensor<E, D>,
 ) -> WgpuTensor<u32, D> {
     lhs.assert_is_on_same_device(&rhs);
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let mut shape_out = [0; D];
     lhs.shape
@@ -101,7 +101,7 @@ pub fn comparison_inplace<K: StaticKernelSource, E: WgpuElement, const D: usize>
     lhs: WgpuTensor<E, D>,
     rhs: WgpuTensor<E, D>,
 ) -> WgpuTensor<u32, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     lhs.assert_is_on_same_device(&rhs);
 

@@ -21,7 +21,7 @@ pub(crate) fn adaptive_avg_pool2d<E: WgpuElement>(
     x: WgpuTensor<E, 4>,
     output_size: [usize; 2],
 ) -> WgpuTensor<E, 4> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let [batch_size, channels, _, _] = x.shape.dims;
 
@@ -44,7 +44,7 @@ pub(crate) fn adaptive_avg_pool2d_backward<E: WgpuElement>(
     x: WgpuTensor<E, 4>,
     out_grad: WgpuTensor<E, 4>,
 ) -> WgpuTensor<E, 4> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let output_shape = x.shape.clone();
     let num_elems = output_shape.num_elements();

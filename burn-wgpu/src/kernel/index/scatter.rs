@@ -14,7 +14,7 @@ pub(crate) fn scatter<E: WgpuElement, I: WgpuElement, const D: usize>(
     indices: WgpuTensor<I, D>,
     value: WgpuTensor<E, D>,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let indices = kernel::into_contiguous(indices);
     let tensor = kernel::into_contiguous(tensor);

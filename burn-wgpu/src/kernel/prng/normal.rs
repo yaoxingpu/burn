@@ -37,7 +37,7 @@ pub fn random_normal<G: GraphicsApi, E: WgpuElement, const D: usize>(
     mean: E,
     std: E,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
     const N_VALUES_PER_THREAD: usize = 128; // must be even
 
     let client = compute_client::<G>(device);

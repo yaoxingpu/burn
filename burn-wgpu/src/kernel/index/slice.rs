@@ -19,7 +19,7 @@ pub(crate) fn slice<E: WgpuElement, const D1: usize, const D2: usize>(
     tensor: WgpuTensor<E, D1>,
     indices: [Range<usize>; D2],
 ) -> WgpuTensor<E, D1> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let mut dims = tensor.shape.dims;
     for i in 0..D2 {
@@ -55,7 +55,7 @@ pub(crate) fn slice_assign<E: WgpuElement, const D1: usize, const D2: usize>(
     indices: [Range<usize>; D2],
     value: WgpuTensor<E, D1>,
 ) -> WgpuTensor<E, D1> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let tensor = match tensor.can_mut() {
         true => tensor,

@@ -39,7 +39,7 @@ pub(crate) fn avg_pool2d<E: WgpuElement>(
     padding: [usize; 2],
     count_include_pad: bool,
 ) -> WgpuTensor<E, 4> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let (info_handle, output) =
         build_output_and_info_pool2d(&x, kernel_size, stride, padding, [1, 1]);
@@ -68,7 +68,7 @@ pub(crate) fn avg_pool2d_backward<E: WgpuElement>(
     padding: [usize; 2],
     count_include_pad: bool,
 ) -> WgpuTensor<E, 4> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let grad = kernel::into_contiguous(grad);
     let output = empty_device(x.client.clone(), x.device.clone(), x.shape.clone());

@@ -143,7 +143,8 @@ where
         lhs: FloatTensor<Self, D>,
         rhs: FloatTensor<Self, D>,
     ) -> FloatTensor<Self, D> {
-        kernel::matmul::contiguous::matmul_tiling_2d_default(lhs, rhs)
+        // kernel::matmul::contiguous::matmul_tiling_2d_default(lhs, rhs)
+        kernel::matmul::matmul_mem_coalescing_default(lhs, rhs)
     }
 
     fn swap_dims<const D: usize>(

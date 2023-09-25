@@ -58,7 +58,7 @@ pub fn comparison_elem<K: StaticKernelSource, E: WgpuElement, const D: usize>(
     lhs: WgpuTensor<E, D>,
     rhs: E,
 ) -> WgpuTensor<u32, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
     let num_elems = lhs.shape.num_elements();
 
     let handle = lhs.client.empty(num_elems * core::mem::size_of::<u32>());
@@ -77,7 +77,7 @@ pub fn comparison_elem_inplace<K: StaticKernelSource, E: WgpuElement, const D: u
     lhs: WgpuTensor<E, D>,
     rhs: E,
 ) -> WgpuTensor<u32, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let kernel = StaticKernel::<KernelSettings<K, E, i32, WORKGROUP, WORKGROUP, 1>>::new(
         elemwise_workgroup(lhs.shape.num_elements(), WORKGROUP),

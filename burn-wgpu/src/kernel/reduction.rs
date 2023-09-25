@@ -50,7 +50,7 @@ impl StaticKernelSource for ArgsMin {
 
 /// Sum all elements in the input buffer.
 pub fn sum<E: WgpuElement, const D: usize>(input: WgpuTensor<E, D>) -> WgpuTensor<E, 1> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let mut input_handle = input.handle;
     let mut workgroup = elemwise_workgroup(input.shape.num_elements(), WORKGROUP);
@@ -99,7 +99,7 @@ fn reduction_dim<K: StaticKernelSource, E: WgpuElement, const D: usize>(
     input: WgpuTensor<E, D>,
     dim: usize,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let mut shape_out = input.shape.clone();
     shape_out.dims[dim] = 1;
@@ -148,7 +148,7 @@ fn reduction_args_dim<K: StaticKernelSource, E: WgpuElement, I: WgpuElement, con
     input: WgpuTensor<E, D>,
     dim: usize,
 ) -> WgpuTensor<I, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let mut shape_out = input.shape.clone();
     shape_out.dims[dim] = 1;

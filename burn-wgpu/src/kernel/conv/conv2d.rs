@@ -19,7 +19,7 @@ pub(crate) fn conv2d<E: WgpuElement + Element>(
     bias: Option<WgpuTensor<E, 1>>,
     options: ConvOptions<2>,
 ) -> WgpuTensor<E, 4> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let input = kernel::into_contiguous(input);
     let weight = kernel::into_contiguous(weight);

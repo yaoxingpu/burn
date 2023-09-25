@@ -15,7 +15,7 @@ pub fn mask_fill<E: WgpuElement, const D: usize>(
     mask: WgpuTensor<u32, D>,
     value: E,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let num_elems = input.shape.num_elements();
     let output = empty_device(
@@ -51,7 +51,7 @@ pub fn mask_fill_inplace<E: WgpuElement, const D: usize>(
     mask: WgpuTensor<u32, D>,
     value: E,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let num_elems = input.shape.num_elements();
     let value_handle = input.client.create(E::as_bytes(&[value]));

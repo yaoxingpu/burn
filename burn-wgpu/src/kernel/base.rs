@@ -49,7 +49,7 @@ pub fn into_contiguous<E: WgpuElement, const D: usize>(
         return tensor;
     }
 
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let num_elems = tensor.shape.num_elements();
     let handle = tensor.client.empty(num_elems * core::mem::size_of::<E>());

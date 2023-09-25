@@ -15,7 +15,7 @@ pub fn mask_where<E: WgpuElement, const D: usize>(
     mask: WgpuTensor<u32, D>,
     value: WgpuTensor<E, D>,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let num_elems = input.shape.num_elements();
     let output = empty_device(
@@ -51,7 +51,7 @@ pub fn mask_where_inplace<E: WgpuElement, const D: usize>(
     value: WgpuTensor<E, D>,
     reverse: bool,
 ) -> WgpuTensor<E, D> {
-    const WORKGROUP: usize = 32;
+    const WORKGROUP: usize = 16;
 
     let kernel =
         StaticKernel::<KernelSettings<MaskWhereInplace, E, i32, WORKGROUP, WORKGROUP, 1>>::new(

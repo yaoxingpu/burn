@@ -2,6 +2,7 @@ use crate as burn;
 
 use crate::{config::Config, module::Module};
 use burn_tensor::activation::sigmoid;
+use burn_tensor::Data;
 use burn_tensor::{backend::Backend, Int, Tensor};
 
 /// Configuration to create a [Binary Cross-entropy loss](BinaryCrossEntropyLoss).
@@ -36,7 +37,7 @@ impl BinaryCrossEntropyLossConfig {
             weights: self
                 .weights
                 .as_ref()
-                .map(|e| Tensor::<B, 1>::from_floats_devauto(e.as_slice())),
+                .map(|e| Tensor::<B, 1>::from(Data::from(e.as_slice()).convert())),
             smoothing: self.smoothing,
             logits: self.logits,
         }
@@ -124,7 +125,7 @@ mod tests {
         let [batch_size] = [4];
         let logits =
             Tensor::<TestBackend, 1>::random_devauto([batch_size], Distribution::Normal(0., 1.0));
-        let targets = Tensor::<TestBackend, 1, Int>::from_data_devauto(Data::from([0, 1, 0, 1]));
+        let targets = Tensor::<TestBackend, 1, Int>::from([0, 1, 0, 1]);
 
         let loss_1 = BinaryCrossEntropyLossConfig::new()
             .init()
@@ -141,7 +142,7 @@ mod tests {
         let [batch_size] = [4];
         let logits =
             Tensor::<TestBackend, 1>::random_devauto([batch_size], Distribution::Normal(0., 1.0));
-        let targets = Tensor::<TestBackend, 1, Int>::from_data_devauto(Data::from([0, 1, 0, 1]));
+        let targets = Tensor::<TestBackend, 1, Int>::from([0, 1, 0, 1]);
         let weights = [3., 7.];
 
         let loss_1 = BinaryCrossEntropyLossConfig::new()
@@ -152,7 +153,7 @@ mod tests {
         let loss_2 = targets.clone().float() * logits.clone().log()
             + (-targets.float() + 1) * (-logits + 1).log();
 
-        let loss_2 = loss_2 * Tensor::from_floats_devauto([3., 7., 3., 7.]);
+        let loss_2 = loss_2 * Tensor::from([3., 7., 3., 7.]);
         let loss_2 = loss_2.neg().sum() / (3. + 3. + 7. + 7.);
         loss_1.into_data().assert_approx_eq(&loss_2.into_data(), 3);
     }
@@ -162,7 +163,7 @@ mod tests {
         let [batch_size] = [4];
         let logits =
             Tensor::<TestBackend, 1>::random_devauto([batch_size], Distribution::Normal(0., 1.0));
-        let targets = Tensor::<TestBackend, 1, Int>::from_data_devauto(Data::from([0, 1, 0, 1]));
+        let targets = Tensor::<TestBackend, 1, Int>::from([0, 1, 0, 1]);
 
         let loss_1 = BinaryCrossEntropyLossConfig::new()
             .with_smoothing(Some(0.1))

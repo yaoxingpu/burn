@@ -508,7 +508,7 @@ where
     /// use burn_tensor::{Int, Tensor};
     ///
     /// fn example<B: Backend>() {
-    ///    let tensor = Tensor::<B, 2, Int>::from_ints_devauto([
+    ///    let tensor = Tensor::<B, 2, Int>::from([
     ///      [1, 2, 3],
     ///      [4, 5, 6],
     ///      [7, 8, 9]
@@ -535,7 +535,7 @@ where
     /// use burn_tensor::{Int, Tensor};
     ///
     /// fn example<B: Backend>() {
-    ///    let tensor = Tensor::<B, 2, Int>::from_ints_devauto([
+    ///    let tensor = Tensor::<B, 2, Int>::from([
     ///      [1, 2, 3],
     ///      [4, 5, 6],
     ///      [7, 8, 9]

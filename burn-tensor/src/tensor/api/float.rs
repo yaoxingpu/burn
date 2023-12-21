@@ -136,7 +136,7 @@ where
     /// use burn_tensor::Tensor;
     ///
     /// fn example<B: Backend>() {
-    ///     let float_tensor = Tensor::<B, 1>::from_floats_devauto([1.0, 2.0]);
+    ///     let float_tensor = Tensor::<B, 1>::from([1.0, 2.0]);
     ///     let int_tensor = float_tensor.int();
     /// }
     /// ```

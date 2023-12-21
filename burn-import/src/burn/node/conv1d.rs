@@ -93,14 +93,12 @@ impl<PS: PrecisionSettings> NodeCodegen<PS> for Conv1dNode<PS> {
         let record = Conv1dRecord::<SerializationBackend> {
             weight: Param::new(
                 ParamId::new(),
-                Tensor::from_data_devauto(self.data_weights.clone().convert()),
+                Tensor::from(self.data_weights.clone().convert()),
             ),
-            bias: self.data_bias.as_ref().map(|bias| {
-                Param::new(
-                    ParamId::new(),
-                    Tensor::from_data_devauto(bias.clone().convert()),
-                )
-            }),
+            bias: self
+                .data_bias
+                .as_ref()
+                .map(|bias| Param::new(ParamId::new(), Tensor::from(bias.clone().convert()))),
             stride: ConstantRecord::new(),
             kernel_size: ConstantRecord::new(),
             dilation: ConstantRecord::new(),

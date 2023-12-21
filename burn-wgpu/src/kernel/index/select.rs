@@ -107,9 +107,8 @@ mod tests {
     fn select_should_work_with_multiple_workgroups() {
         let tensor = Tensor::<TestBackend, 2>::random_devauto([6, 256], Distribution::Default);
         let indices = Tensor::<TestBackend, 1, Int>::arange_devauto(0..100);
-        let tensor_ref = Tensor::<ReferenceBackend, 2>::from_data_devauto(tensor.to_data());
-        let indices_ref =
-            Tensor::<ReferenceBackend, 1, Int>::from_data_devauto(indices.to_data().convert());
+        let tensor_ref = Tensor::<ReferenceBackend, 2>::from(tensor.to_data());
+        let indices_ref = Tensor::<ReferenceBackend, 1, Int>::from(indices.to_data().convert());
 
         let actual = select(tensor.into_primitive(), 1, indices.into_primitive());
         let expected = tensor_ref.select(1, indices_ref);
@@ -149,7 +148,7 @@ mod tests {
         TestBackend::seed(0);
         let tensor = Tensor::<TestBackend, D>::random_devauto(shape, Distribution::Default);
         let value = Tensor::<TestBackend, D>::random_devauto(shape, Distribution::Default);
-        let indices = Tensor::<TestBackend, 1, Int>::from_data_devauto(
+        let indices = Tensor::<TestBackend, 1, Int>::from(
             Tensor::<TestBackend, 1>::random_devauto(
                 [shape[dim]],
                 Distribution::Uniform(0., shape[dim] as f64),
@@ -157,10 +156,9 @@ mod tests {
             .into_data()
             .convert(),
         );
-        let tensor_ref = Tensor::<ReferenceBackend, D>::from_data_devauto(tensor.to_data());
-        let value_ref = Tensor::<ReferenceBackend, D>::from_data_devauto(value.to_data());
-        let indices_ref =
-            Tensor::<ReferenceBackend, 1, Int>::from_data_devauto(indices.to_data().convert());
+        let tensor_ref = Tensor::<ReferenceBackend, D>::from(tensor.to_data());
+        let value_ref = Tensor::<ReferenceBackend, D>::from(value.to_data());
+        let indices_ref = Tensor::<ReferenceBackend, 1, Int>::from(indices.to_data().convert());
 
         let actual = Tensor::<TestBackend, D>::from_primitive(select_assign(
             tensor.into_primitive(),

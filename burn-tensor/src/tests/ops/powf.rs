@@ -5,8 +5,7 @@ mod tests {
 
     #[test]
     fn should_support_powf_ops() {
-        let data = Data::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
 
         let data_actual = tensor.powf(0.71).into_data();
 
@@ -16,8 +15,7 @@ mod tests {
 
     #[test]
     fn should_support_neg_power() {
-        let data = Data::from([[1.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[1.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
 
         let data_actual = tensor.powf(-0.33).into_data();
 
@@ -27,8 +25,7 @@ mod tests {
 
     #[test]
     fn should_support_neg_values_with_even_power() {
-        let data = Data::from([[0.0, -1.0, -2.0], [-3.0, -4.0, -5.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[0.0, -1.0, -2.0], [-3.0, -4.0, -5.0]]);
 
         let data_actual = tensor.powf(4.0).into_data();
 
@@ -38,8 +35,7 @@ mod tests {
 
     #[test]
     fn should_support_neg_values_with_odd_power() {
-        let data = Data::from([[0.0, -1.0, -2.0], [-3.0, -4.0, -5.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[0.0, -1.0, -2.0], [-3.0, -4.0, -5.0]]);
 
         let data_actual = tensor.powf(3.0).into_data();
 

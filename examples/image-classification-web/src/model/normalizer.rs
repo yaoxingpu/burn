@@ -1,4 +1,4 @@
-use burn::tensor::{backend::Backend, Tensor};
+use burn::tensor::{backend::Backend, Data, Tensor};
 
 // Values are taken from the [ONNX SqueezeNet]
 // (https://github.com/onnx/models/tree/main/vision/classification/squeezenet#preprocessing)
@@ -14,8 +14,8 @@ pub struct Normalizer<B: Backend> {
 impl<B: Backend> Normalizer<B> {
     /// Creates a new normalizer.
     pub fn new() -> Self {
-        let mean = Tensor::from_floats_devauto(MEAN).reshape([1, 3, 1, 1]);
-        let std = Tensor::from_floats_devauto(STD).reshape([1, 3, 1, 1]);
+        let mean = Tensor::from(Data::from(MEAN).convert()).reshape([1, 3, 1, 1]);
+        let std = Tensor::from(Data::from(STD).convert()).reshape([1, 3, 1, 1]);
         Self { mean, std }
     }
 

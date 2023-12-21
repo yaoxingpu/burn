@@ -98,7 +98,7 @@ mod tests {
     fn slice_should_work_with_multiple_workgroups() {
         let tensor = Tensor::<TestBackend, 2>::random_devauto([6, 256], Distribution::Default);
         let indices = [3..5, 45..256];
-        let tensor_ref = Tensor::<ReferenceBackend, 2>::from_data_devauto(tensor.to_data());
+        let tensor_ref = Tensor::<ReferenceBackend, 2>::from(tensor.to_data());
 
         let actual = slice(tensor.into_primitive(), indices.clone());
         let expected = tensor_ref.slice(indices);
@@ -114,8 +114,8 @@ mod tests {
         let tensor = Tensor::<TestBackend, 2>::random_devauto([6, 256], Distribution::Default);
         let value = Tensor::<TestBackend, 2>::random_devauto([2, 211], Distribution::Default);
         let indices = [3..5, 45..256];
-        let tensor_ref = Tensor::<ReferenceBackend, 2>::from_data_devauto(tensor.to_data());
-        let value_ref = Tensor::<ReferenceBackend, 2>::from_data_devauto(value.to_data());
+        let tensor_ref = Tensor::<ReferenceBackend, 2>::from(tensor.to_data());
+        let value_ref = Tensor::<ReferenceBackend, 2>::from(value.to_data());
 
         let actual = slice_assign(
             tensor.into_primitive(),

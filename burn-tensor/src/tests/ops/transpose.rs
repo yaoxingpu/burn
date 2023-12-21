@@ -5,7 +5,7 @@ mod tests {
 
     #[test]
     fn should_support_transpose_ops() {
-        let tensor = TestTensor::from_floats_devauto([
+        let tensor = TestTensor::from([
             [[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]],
             [[6.0, 7.0, 8.0], [9.0, 10.0, 11.0]],
         ]);
@@ -21,7 +21,7 @@ mod tests {
 
     #[test]
     fn should_support_swap_dims() {
-        let tensor = TestTensor::from_floats_devauto([
+        let tensor = TestTensor::from([
             [[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]],
             [[6.0, 7.0, 8.0], [9.0, 10.0, 11.0]],
         ]);
@@ -38,10 +38,8 @@ mod tests {
 
     #[test]
     fn should_support_transpose_ops_int() {
-        let tensor = Tensor::<TestBackend, 3, Int>::from_data_devauto([
-            [[0, 1, 2], [3, 4, 5]],
-            [[6, 7, 8], [9, 10, 11]],
-        ]);
+        let tensor =
+            Tensor::<TestBackend, 3, Int>::from([[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]);
 
         let data_actual = tensor.transpose().into_data();
 
@@ -51,10 +49,8 @@ mod tests {
 
     #[test]
     fn should_support_swap_dims_int() {
-        let tensor = Tensor::<TestBackend, 3, Int>::from_data_devauto([
-            [[0, 1, 2], [3, 4, 5]],
-            [[6, 7, 8], [9, 10, 11]],
-        ]);
+        let tensor =
+            Tensor::<TestBackend, 3, Int>::from([[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]);
 
         let data_actual = tensor.swap_dims(0, 2).into_data();
 
@@ -64,7 +60,7 @@ mod tests {
 
     #[test]
     fn should_support_transpose_bool() {
-        let tensor = Tensor::<TestBackend, 3, Bool>::from_data_devauto([
+        let tensor = Tensor::<TestBackend, 3, Bool>::from([
             [[false, true, false], [false, false, false]],
             [[false, false, true], [false, false, true]],
         ]);
@@ -80,7 +76,7 @@ mod tests {
 
     #[test]
     fn should_support_swap_dims_bool() {
-        let tensor = Tensor::<TestBackend, 3, Bool>::from_data_devauto([
+        let tensor = Tensor::<TestBackend, 3, Bool>::from([
             [[false, true, false], [false, false, false]],
             [[false, false, true], [false, false, true]],
         ]);

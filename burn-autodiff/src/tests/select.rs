@@ -5,10 +5,8 @@ mod tests {
 
     #[test]
     fn test_select_grad() {
-        let tensor_1 =
-            TestAutodiffTensor::from_data_devauto(Data::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]))
-                .require_grad();
-        let indices = Tensor::<TestAutodiffBackend, 1, Int>::from_data_devauto(Data::from([1, 0]));
+        let tensor_1 = TestAutodiffTensor::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]).require_grad();
+        let indices = Tensor::<TestAutodiffBackend, 1, Int>::from([1, 0]);
 
         let tensor_2 = tensor_1.clone().matmul(tensor_1.clone().transpose());
         let tensor_3 = tensor_1.clone().select(0, indices);
@@ -26,13 +24,9 @@ mod tests {
 
     #[test]
     fn test_select_assign_grad() {
-        let tensor_1 =
-            TestAutodiffTensor::from_data_devauto(Data::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]))
-                .require_grad();
-        let values =
-            TestAutodiffTensor::from_data_devauto(Data::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]))
-                .require_grad();
-        let indices = Tensor::<TestAutodiffBackend, 1, Int>::from_data_devauto(Data::from([1, 0]));
+        let tensor_1 = TestAutodiffTensor::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]).require_grad();
+        let values = TestAutodiffTensor::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]).require_grad();
+        let indices = Tensor::<TestAutodiffBackend, 1, Int>::from([1, 0]);
 
         let tensor_2 = tensor_1.clone().matmul(tensor_1.clone().transpose());
         let tensor_3 = tensor_1.clone().select_assign(0, indices, values.clone());

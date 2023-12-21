@@ -36,33 +36,32 @@ for the sake of simplicity, we ignore type signatures. For more details, refer t
 
 Those operations are available for all tensor kinds: `Int`, `Float`, and `Bool`.
 
-| Burn                                     | PyTorch Equivalent                   |
-| ---------------------------------------- | ------------------------------------ |
-| `Tensor::empty_devauto(shape)`           | `torch.empty(shape)`                 |
-| `Tensor::empty(shape, device)`           | `torch.empty(shape, device=device)`  |
-| `tensor.dims()`                          | `tensor.size()`                      |
-| `tensor.shape()`                         | `tensor.shape`                       |
-| `tensor.reshape(shape)`                  | `tensor.view(shape)`                 |
-| `tensor.flatten(start_dim, end_dim)`     | `tensor.flatten(start_dim, end_dim)` |
-| `tensor.squeeze(dim)`                    | `tensor.squeeze(dim)`                |
-| `tensor.unsqueeze()`                     | `tensor.unsqueeze(0)`                |
-| `tensor.unsqueeze_dim(dim)`              | `tensor.unsqueeze(dim)`              |
-| `tensor.slice(ranges)`                   | `tensor[(*ranges,)]`                 |
-| `tensor.slice_assign(ranges, values)`    | `tensor[(*ranges,)] = values`        |
-| `tensor.narrow(dim, start, length)`      | `tensor.narrow(dim, start, length)`  |
-| `tensor.chunk(num_chunks, dim)`          | `tensor.chunk(num_chunks, dim)`      |
-| `tensor.device()`                        | `tensor.device`                      |
-| `tensor.to_device(device)`               | `tensor.to(device)`                  |
-| `tensor.repeat(2, 4)`                    | `tensor.repeat([1, 1, 4])`           |
-| `tensor.equal(other)`                    | `x == y`                             |
-| `Tensor::cat(tensors, dim)`              | `torch.cat(tensors, dim)`            |
-| `tensor.into_data()`                     | N/A                                  |
-| `tensor.to_data()`                       | N/A                                  |
-| `Tensor::from_data_devauto(data)`        | N/A                                  |
-| `Tensor::from_data(data, device)`        | N/A                                  |
-| `tensor.into_primitive()`                | N/A                                  |
-| `Tensor::from_primitive(primitive)`      | N/A                                  |
-| `Tensor::stack(tensors, dim)`            | torch.stack(tensors, dim)`           |
+| Burn                                  | PyTorch Equivalent                   |
+| ------------------------------------- | ------------------------------------ |
+| `Tensor::empty_devauto(shape)`        | `torch.empty(shape)`                 |
+| `Tensor::empty(shape, device)`        | `torch.empty(shape, device=device)`  |
+| `tensor.dims()`                       | `tensor.size()`                      |
+| `tensor.shape()`                      | `tensor.shape`                       |
+| `tensor.reshape(shape)`               | `tensor.view(shape)`                 |
+| `tensor.flatten(start_dim, end_dim)`  | `tensor.flatten(start_dim, end_dim)` |
+| `tensor.squeeze(dim)`                 | `tensor.squeeze(dim)`                |
+| `tensor.unsqueeze()`                  | `tensor.unsqueeze(0)`                |
+| `tensor.unsqueeze_dim(dim)`           | `tensor.unsqueeze(dim)`              |
+| `tensor.slice(ranges)`                | `tensor[(*ranges,)]`                 |
+| `tensor.slice_assign(ranges, values)` | `tensor[(*ranges,)] = values`        |
+| `tensor.narrow(dim, start, length)`   | `tensor.narrow(dim, start, length)`  |
+| `tensor.chunk(num_chunks, dim)`       | `tensor.chunk(num_chunks, dim)`      |
+| `tensor.device()`                     | `tensor.device`                      |
+| `tensor.to_device(device)`            | `tensor.to(device)`                  |
+| `tensor.repeat(2, 4)`                 | `tensor.repeat([1, 1, 4])`           |
+| `tensor.equal(other)`                 | `x == y`                             |
+| `Tensor::cat(tensors, dim)`           | `torch.cat(tensors, dim)`            |
+| `tensor.into_data()`                  | N/A                                  |
+| `tensor.to_data()`                    | N/A                                  |
+| `Tensor::from_data(data, device)`     | N/A                                  |
+| `tensor.into_primitive()`             | N/A                                  |
+| `Tensor::from_primitive(primitive)`   | N/A                                  |
+| `Tensor::stack(tensors, dim)`         | torch.stack(tensors, dim)`           |
 
 ### Numeric Operations
 
@@ -124,49 +123,48 @@ Those operations are available for numeric tensor kinds: `Float` and `Int`.
 
 Those operations are only available for `Float` tensors.
 
-| Burn API                                            | PyTorch Equivalent                 |
-| --------------------------------------------------- | ---------------------------------- |
-| `tensor.exp()`                                      | `tensor.exp()`                     |
-| `tensor.log()`                                      | `tensor.log()`                     |
-| `tensor.log1p()`                                    | `tensor.log1p()`                   |
-| `tensor.erf()`                                      | `tensor.erf()`                     |
-| `tensor.powf(value)`                                | `tensor.pow(value)`                |
-| `tensor.sqrt()`                                     | `tensor.sqrt()`                    |
-| `tensor.recip()`                                    | `tensor.reciprocal()`              |
-| `tensor.cos()`                                      | `tensor.cos()`                     |
-| `tensor.sin()`                                      | `tensor.sin()`                     |
-| `tensor.tanh()`                                     | `tensor.tanh()`                    |
-| `tensor.from_floats_devauto(floats)`                | N/A                                |
-| `tensor.from_floats(floats, device)`                | N/A                                |
-| `tensor.int()`                                      | Similar to `tensor.to(torch.long)` |
-| `tensor.zeros_like()`                               | `torch.zeros_like(tensor)`         |
-| `tensor.ones_like()`                                | `torch.ones_like(tensor)`          |
-| `tensor.random_like(distribution)`                  | `torch.rand_like()` only uniform   |
-| `tensor.one_hot(index, num_classes)`                | N/A                                |
-| `tensor.transpose()`                                | `tensor.T`                         |
-| `tensor.swap_dims(dim1, dim2)`                      | `tensor.transpose(dim1, dim2)`     |
-| `tensor.matmul(other)`                              | `tensor.matmul(other)`             |
-| `tensor.var(dim)`                                   | `tensor.var(dim)`                  |
-| `tensor.var_bias(dim)`                              | N/A                                |
-| `tensor.var_mean(dim)`                              | N/A                                |
-| `tensor.var_mean_bias(dim)`                         | N/A                                |
-| `tensor.random_devauto(shape, distribution)`        | N/A                                |
-| `tensor.random(shape, distribution, device)`        | N/A                                |
-| `tensor.to_full_precision()`                        | `tensor.to(torch.float)`           |
-| `tensor.from_full_precision(tensor)`                | N/A                                |
+| Burn API                                     | PyTorch Equivalent                 |
+| -------------------------------------------- | ---------------------------------- |
+| `tensor.exp()`                               | `tensor.exp()`                     |
+| `tensor.log()`                               | `tensor.log()`                     |
+| `tensor.log1p()`                             | `tensor.log1p()`                   |
+| `tensor.erf()`                               | `tensor.erf()`                     |
+| `tensor.powf(value)`                         | `tensor.pow(value)`                |
+| `tensor.sqrt()`                              | `tensor.sqrt()`                    |
+| `tensor.recip()`                             | `tensor.reciprocal()`              |
+| `tensor.cos()`                               | `tensor.cos()`                     |
+| `tensor.sin()`                               | `tensor.sin()`                     |
+| `tensor.tanh()`                              | `tensor.tanh()`                    |
+| `tensor.from_floats(floats, device)`         | N/A                                |
+| `tensor.int()`                               | Similar to `tensor.to(torch.long)` |
+| `tensor.zeros_like()`                        | `torch.zeros_like(tensor)`         |
+| `tensor.ones_like()`                         | `torch.ones_like(tensor)`          |
+| `tensor.random_like(distribution)`           | `torch.rand_like()` only uniform   |
+| `tensor.one_hot(index, num_classes)`         | N/A                                |
+| `tensor.transpose()`                         | `tensor.T`                         |
+| `tensor.swap_dims(dim1, dim2)`               | `tensor.transpose(dim1, dim2)`     |
+| `tensor.matmul(other)`                       | `tensor.matmul(other)`             |
+| `tensor.var(dim)`                            | `tensor.var(dim)`                  |
+| `tensor.var_bias(dim)`                       | N/A                                |
+| `tensor.var_mean(dim)`                       | N/A                                |
+| `tensor.var_mean_bias(dim)`                  | N/A                                |
+| `tensor.random_devauto(shape, distribution)` | N/A                                |
+| `tensor.random(shape, distribution, device)` | N/A                                |
+| `tensor.to_full_precision()`                 | `tensor.to(torch.float)`           |
+| `tensor.from_full_precision(tensor)`         | N/A                                |
 
 # Int Operations
 
 Those operations are only available for `Int` tensors.
 
-| Burn API                                      | PyTorch Equivalent                                      |
-| --------------------------------------------- | ------------------------------------------------------- |
-| `tensor.from_ints(ints)`                      | N/A                                                     |
-| `tensor.float()`                              | Similar to `tensor.to(torch.float)`                     |
-| `tensor.arange_devauto(5..10)`                | `tensor.arange(start=5, end=10)`                        |
-| `tensor.arange(5..10, device)       `         | `tensor.arange(start=5, end=10, device=device)`         |
-| `tensor.arange_step_devauto(5..10, 2)`        | `tensor.arange(start=5, end=10, step=2)`                |
-| `tensor.arange_step(5..10, 2, device)`        | `tensor.arange(start=5, end=10, step=2, device=device)` |
+| Burn API                               | PyTorch Equivalent                                      |
+| -------------------------------------- | ------------------------------------------------------- |
+| `tensor.from_ints(ints)`               | N/A                                                     |
+| `tensor.float()`                       | Similar to `tensor.to(torch.float)`                     |
+| `tensor.arange_devauto(5..10)`         | `tensor.arange(start=5, end=10)`                        |
+| `tensor.arange(5..10, device) `        | `tensor.arange(start=5, end=10, device=device)`         |
+| `tensor.arange_step_devauto(5..10, 2)` | `tensor.arange(start=5, end=10, step=2)`                |
+| `tensor.arange_step(5..10, 2, device)` | `tensor.arange(start=5, end=10, step=2, device=device)` |
 
 # Bool Operations
 
@@ -180,16 +178,16 @@ Those operations are only available for `Bool` tensors.
 
 ## Activation Functions
 
-| Burn API                                   | PyTorch Equivalent                                    |
-| ------------------------------------------ | ----------------------------------------------------- |
-| `activation::gelu(tensor)`                 | Similar to `nn.functional.gelu(tensor)`               |
-| `activation::log_sigmoid(tensor)`          | Similar to `nn.functional.log_sigmoid(tensor)`        |
-| `activation::log_softmax(tensor, dim)`     | Similar to `nn.functional.log_softmax(tensor, dim)`   |
-| `activation::mish(tensor)`                 | Similar to `nn.functional.mish(tensor)`               |
-| `activation::quiet_softmax(tensor, dim)`   | Similar to `nn.functional.quiet_softmax(tensor, dim)` |
-| `activation::relu(tensor)`                 | Similar to `nn.functional.relu(tensor)`               |
-| `activation::sigmoid(tensor)`              | Similar to `nn.functional.sigmoid(tensor)`            |
-| `activation::silu(tensor)`                 | Similar to `nn.functional.silu(tensor)`               |
-| `activation::softmax(tensor, dim)`         | Similar to `nn.functional.softmax(tensor, dim)`       |
-| `activation::softplus(tensor, beta)`       | Similar to `nn.functional.softplus(tensor, beta)`     |
-| `activation::tanh(tensor)`                 | Similar to `nn.functional.tanh(tensor)`               |
+| Burn API                                 | PyTorch Equivalent                                    |
+| ---------------------------------------- | ----------------------------------------------------- |
+| `activation::gelu(tensor)`               | Similar to `nn.functional.gelu(tensor)`               |
+| `activation::log_sigmoid(tensor)`        | Similar to `nn.functional.log_sigmoid(tensor)`        |
+| `activation::log_softmax(tensor, dim)`   | Similar to `nn.functional.log_softmax(tensor, dim)`   |
+| `activation::mish(tensor)`               | Similar to `nn.functional.mish(tensor)`               |
+| `activation::quiet_softmax(tensor, dim)` | Similar to `nn.functional.quiet_softmax(tensor, dim)` |
+| `activation::relu(tensor)`               | Similar to `nn.functional.relu(tensor)`               |
+| `activation::sigmoid(tensor)`            | Similar to `nn.functional.sigmoid(tensor)`            |
+| `activation::silu(tensor)`               | Similar to `nn.functional.silu(tensor)`               |
+| `activation::softmax(tensor, dim)`       | Similar to `nn.functional.softmax(tensor, dim)`       |
+| `activation::softplus(tensor, beta)`     | Similar to `nn.functional.softplus(tensor, beta)`     |
+| `activation::tanh(tensor)`               | Similar to `nn.functional.tanh(tensor)`               |

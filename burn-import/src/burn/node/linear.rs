@@ -85,14 +85,12 @@ impl<PS: PrecisionSettings> NodeCodegen<PS> for LinearNode<PS> {
         let record = LinearRecord::<SerializationBackend> {
             weight: Param::new(
                 ParamId::new(),
-                Tensor::from_data_devauto(self.data_weights.clone().convert()),
+                Tensor::from(self.data_weights.clone().convert()),
             ),
-            bias: self.data_bias.as_ref().map(|bias| {
-                Param::new(
-                    ParamId::new(),
-                    Tensor::from_data_devauto(bias.clone().convert()),
-                )
-            }),
+            bias: self
+                .data_bias
+                .as_ref()
+                .map(|bias| Param::new(ParamId::new(), Tensor::from(bias.clone().convert()))),
         };
 
         let item = Record::into_item::<PS>(record);

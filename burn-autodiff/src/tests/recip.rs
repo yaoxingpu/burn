@@ -5,9 +5,7 @@ mod tests {
 
     #[test]
     fn should_diff_recip() {
-        let data = Data::from([2.0, 5.0, 0.4]);
-
-        let tensor = TestAutodiffTensor::from_data_devauto(data).require_grad();
+        let tensor = TestAutodiffTensor::from([2.0, 5.0, 0.4]).require_grad();
         let tensor_out = tensor.clone().recip();
 
         let grads = tensor_out.backward();

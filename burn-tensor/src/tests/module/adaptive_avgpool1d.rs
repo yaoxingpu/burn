@@ -56,7 +56,7 @@ mod tests {
     impl AdaptiveAvgPool1dTestCase {
         fn assert_output(self, y: TestTensor<3>) {
             let shape_x = Shape::new([self.batch_size, self.channels, self.length]);
-            let x = TestTensor::from_data_devauto(
+            let x = TestTensor::from(
                 TestTensorInt::arange_devauto(0..shape_x.num_elements())
                     .reshape(shape_x)
                     .into_data()

@@ -79,7 +79,7 @@ mod tests {
             length: 4,
         };
 
-        test.assert_output(TestTensor::from_floats_devauto([
+        test.assert_output(TestTensor::from([
             [[171., 294.], [415., 781.], [659., 1268.], [903., 1755.]],
             [[495., 726.], [1387., 2185.], [2279., 3644.], [3171., 5103.]],
         ]));
@@ -105,18 +105,18 @@ mod tests {
                 self.channels_in / self.groups,
                 self.kernel_size,
             ]);
-            let weight = TestTensor::from_data_devauto(
+            let weight = TestTensor::from(
                 TestTensorInt::arange_devauto(0..shape_weight.num_elements())
                     .reshape(shape_weight)
                     .into_data()
                     .convert(),
             );
-            let bias = TestTensor::from_data_devauto(
+            let bias = TestTensor::from(
                 TestTensorInt::arange_devauto(0..self.channels_out)
                     .into_data()
                     .convert(),
             );
-            let x = TestTensor::from_data_devauto(
+            let x = TestTensor::from(
                 TestTensorInt::arange_devauto(0..shape_x.num_elements())
                     .reshape(shape_x)
                     .into_data()

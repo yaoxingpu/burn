@@ -94,9 +94,9 @@ mod tests {
             Tensor::<TestBackend, 4>::random_devauto([6, 16, 32, 32], Distribution::Default);
         let weight = Tensor::<TestBackend, 4>::random_devauto([12, 8, 3, 3], Distribution::Default);
         let bias = Tensor::<TestBackend, 1>::random_devauto([12], Distribution::Default);
-        let input_ref = Tensor::<ReferenceBackend, 4>::from_data_devauto(input.to_data());
-        let weight_ref = Tensor::<ReferenceBackend, 4>::from_data_devauto(weight.to_data());
-        let bias_ref = Tensor::<ReferenceBackend, 1>::from_data_devauto(bias.to_data());
+        let input_ref = Tensor::<ReferenceBackend, 4>::from(input.to_data());
+        let weight_ref = Tensor::<ReferenceBackend, 4>::from(weight.to_data());
+        let bias_ref = Tensor::<ReferenceBackend, 1>::from(bias.to_data());
         let options = burn_tensor::ops::ConvOptions::new([2, 3], [2, 3], [2, 3], 2);
 
         let output = module::conv2d(input, weight, Some(bias), options.clone());

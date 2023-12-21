@@ -5,11 +5,8 @@ mod tests {
 
     #[test]
     fn should_diff_div() {
-        let data_1 = Data::from([1.0, 7.0]);
-        let data_2 = Data::from([4.0, 7.0]);
-
-        let tensor_1 = TestAutodiffTensor::from_data_devauto(data_1).require_grad();
-        let tensor_2 = TestAutodiffTensor::from_data_devauto(data_2).require_grad();
+        let tensor_1 = TestAutodiffTensor::from([1.0, 7.0]).require_grad();
+        let tensor_2 = TestAutodiffTensor::from([4.0, 7.0]).require_grad();
 
         let tensor_3 = tensor_1.clone().div(tensor_2.clone());
         let grads = tensor_3.backward();
@@ -27,9 +24,7 @@ mod tests {
 
     #[test]
     fn should_diff_div_scalar() {
-        let data = Data::from([1.0, 7.0]);
-
-        let tensor = TestAutodiffTensor::from_data_devauto(data).require_grad();
+        let tensor = TestAutodiffTensor::from([1.0, 7.0]).require_grad();
         let tensor_out = tensor.clone().div_scalar(4.0);
 
         let grads = tensor_out.backward();
@@ -40,13 +35,9 @@ mod tests {
 
     #[test]
     fn test_div_complex_1() {
-        let data_1: Data<f32, 2> = Data::from([[1.0, 7.0], [13.0, -3.0]]);
-        let data_2: Data<f32, 2> = Data::from([[4.0, 7.0], [2.0, 3.0]]);
-        let data_3: Data<f32, 2> = Data::from([[2.0, 2.0], [2.0, 2.0]]);
-
-        let tensor_1 = TestAutodiffTensor::from_data_devauto(data_1).require_grad();
-        let tensor_2 = TestAutodiffTensor::from_data_devauto(data_2).require_grad();
-        let tensor_3 = TestAutodiffTensor::from_data_devauto(data_3).require_grad();
+        let tensor_1 = TestAutodiffTensor::from([[1.0, 7.0], [13.0, -3.0]]).require_grad();
+        let tensor_2 = TestAutodiffTensor::from([[4.0, 7.0], [2.0, 3.0]]).require_grad();
+        let tensor_3 = TestAutodiffTensor::from([[2.0, 2.0], [2.0, 2.0]]).require_grad();
 
         let tensor_4 = tensor_1.clone().div(tensor_2.clone());
         let tensor_5 = tensor_4.div(tensor_3);
@@ -66,11 +57,8 @@ mod tests {
 
     #[test]
     fn test_div_complex_2() {
-        let data_1 = Data::from([[0.0, 1.0], [3.0, 4.0]]);
-        let data_2 = Data::from([[6.0, 7.0], [9.0, 10.0]]);
-
-        let tensor_1 = TestAutodiffTensor::from_data_devauto(data_1).require_grad();
-        let tensor_2 = TestAutodiffTensor::from_data_devauto(data_2).require_grad();
+        let tensor_1 = TestAutodiffTensor::from([[0.0, 1.0], [3.0, 4.0]]).require_grad();
+        let tensor_2 = TestAutodiffTensor::from([[6.0, 7.0], [9.0, 10.0]]).require_grad();
 
         let tensor_3 = tensor_1.clone().matmul(tensor_2.clone());
         let tensor_4 = tensor_3.div(tensor_2.clone());

@@ -809,7 +809,7 @@ where
 /// use burn_tensor::{Tensor, T};
 ///
 /// fn example<B: Backend>() {
-///     let tensor = Tensor::<B, 2>::from_floats_devauto([[1.0, 2.0], [3.0, 4.0]]);
+///     let tensor = Tensor::<B, 2>::from([[1.0, 2.0], [3.0, 4.0]]);
 ///     let transposed = tensor^T;
 /// }
 /// ```

@@ -9,8 +9,7 @@ mod tests {
 
     #[test]
     fn test_cov_1() {
-        let data = Data::from([[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]]);
 
         let data_actual = tensor.cov(1, 1).into_data();
 
@@ -20,8 +19,7 @@ mod tests {
 
     #[test]
     fn test_cov_4() {
-        let data = Data::from([[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]]);
 
         let data_actual = tensor.cov(1, 0).into_data();
 
@@ -31,8 +29,8 @@ mod tests {
 
     #[test]
     fn test_cov_2() {
-        let data = Data::from([[0.5, 1.8], [0.2, -2.0], [3.0, -4.0], [5.0, 0.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor =
+            Tensor::<TestBackend, 2>::from([[0.5, 1.8], [0.2, -2.0], [3.0, -4.0], [5.0, 0.0]]);
 
         let data_actual = tensor.cov(1, 1).into_data();
 
@@ -47,13 +45,12 @@ mod tests {
 
     #[test]
     fn test_cov_3() {
-        let data = Data::from([
+        let tensor = Tensor::<TestBackend, 3>::from([
             [[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]],
             [[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]],
             [[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]],
             [[0.5, 1.8, 0.2, -2.0], [3.0, -4.0, 5.0, 0.0]],
         ]);
-        let tensor = Tensor::<TestBackend, 3>::from_data_devauto(data);
         let data_actual = tensor.cov(0, 1).into_data();
         let data_expected = Tensor::<TestBackend, 3>::zeros_devauto([4, 4, 4]).to_data();
         data_expected.assert_approx_eq(&data_actual, 3);

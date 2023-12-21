@@ -106,9 +106,9 @@ mod tests {
             Distribution::Default,
         );
         let bias = Tensor::<TestBackend, 1>::random_devauto([out_channels], Distribution::Default);
-        let input_ref = Tensor::<ReferenceBackend, 4>::from_data_devauto(input.to_data());
-        let weight_ref = Tensor::<ReferenceBackend, 4>::from_data_devauto(weight.to_data());
-        let bias_ref = Tensor::<ReferenceBackend, 1>::from_data_devauto(bias.to_data());
+        let input_ref = Tensor::<ReferenceBackend, 4>::from(input.to_data());
+        let weight_ref = Tensor::<ReferenceBackend, 4>::from(weight.to_data());
+        let bias_ref = Tensor::<ReferenceBackend, 1>::from(bias.to_data());
 
         let output = module::conv_transpose2d(input, weight, Some(bias), options.clone());
         let output_ref = module::conv_transpose2d(input_ref, weight_ref, Some(bias_ref), options);

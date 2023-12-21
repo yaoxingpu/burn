@@ -209,8 +209,8 @@ mod tests {
         data_2: Data<f32, 2>,
         variant: ImplementationDetails,
     ) -> Data<f32, 2> {
-        let tensor_1 = Tensor::<B, 2>::from_data_devauto(data_1.convert());
-        let tensor_2 = Tensor::<B, 2>::from_data_devauto(data_2.convert());
+        let tensor_1 = Tensor::<B, 2>::from(data_1.convert());
+        let tensor_2 = Tensor::<B, 2>::from(data_2.convert());
         let tensor_3 = tensor_1.clone() + tensor_2;
         let tensor_4 = tensor_3.clone() - tensor_1;
         let mut tensor_5 = tensor_4.clone() + 5.0;

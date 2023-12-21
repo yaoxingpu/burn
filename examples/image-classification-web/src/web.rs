@@ -10,7 +10,7 @@ use crate::model::{label::LABELS, normalizer::Normalizer, squeezenet::Model as S
 
 use burn::{
     backend::NdArray,
-    tensor::{activation::softmax, backend::Backend, Tensor},
+    tensor::{activation::softmax, backend::Backend, Data, Tensor},
 };
 
 use burn_candle::Candle;
@@ -139,7 +139,7 @@ impl<B: Backend> Model<B> {
     pub async fn forward(&self, input: &[f32]) -> Vec<f32> {
         // Reshape from the 1D array to 3d tensor [ width, height, channels]
         let input: Tensor<B, 4> =
-            Tensor::from_floats_devauto(input).reshape([1, CHANNELS, HEIGHT, WIDTH]);
+            Tensor::from(Data::from(input).convert()).reshape([1, CHANNELS, HEIGHT, WIDTH]);
 
         // Normalize input: make between [-1,1] and make the mean=0 and std=1
         let input = self.normalizer.normalize(input);
@@ -148,10 +148,10 @@ impl<B: Backend> Model<B> {
         let output = self.model.forward(input);
 
         // Convert the model output into probability distribution using softmax formula
-        let probabilies = softmax(output, 1);
+        let probabilities = softmax(output, 1);
 
         #[cfg(not(target_family = "wasm"))]
-        let result = probabilies.into_data().convert::<f32>().value;
+        let result = probabilities.into_data().convert::<f32>().value;
 
         // Forces the result to be computed
         #[cfg(target_family = "wasm")]

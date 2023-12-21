@@ -5,8 +5,7 @@ mod tests {
 
     #[test]
     fn should_support_reshape_1d() {
-        let data = Data::from([0.0, 1.0, 2.0]);
-        let tensor = Tensor::<TestBackend, 1>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 1>::from([0.0, 1.0, 2.0]);
 
         let data_actual = tensor.clone().reshape([1, 3]).into_data();
         let data_expected = Data::from([[0.0, 1.0, 2.0]]);
@@ -15,8 +14,7 @@ mod tests {
 
     #[test]
     fn should_support_reshape_int() {
-        let data = Data::from([0, 1, 2]);
-        let tensor = Tensor::<TestBackend, 1, Int>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 1, Int>::from([0, 1, 2]);
 
         let data_actual = tensor.clone().reshape([1, 3]).into_data();
         let data_expected = Data::from([[0, 1, 2]]);
@@ -25,8 +23,7 @@ mod tests {
 
     #[test]
     fn should_support_reshape_bool() {
-        let data = Data::from([false, true, false]);
-        let tensor = Tensor::<TestBackend, 1, Bool>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 1, Bool>::from([false, true, false]);
 
         let data_actual = tensor.clone().reshape([1, 3]).into_data();
         let data_expected = Data::from([[false, true, false]]);
@@ -35,8 +32,7 @@ mod tests {
 
     #[test]
     fn should_support_reshape_2d() {
-        let data = Data::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
 
         let data_actual = tensor.clone().reshape([6]).into_data();
         let data_expected = Data::from([0.0, 1.0, 2.0, 3.0, 4.0, 5.0]);
@@ -45,13 +41,12 @@ mod tests {
 
     #[test]
     fn should_support_dim_infererence() {
-        let data = Data::from([
+        let tensor = Tensor::<TestBackend, 2>::from([
             [0.0, 1.0, 2.0],
             [3.0, 4.0, 5.0],
             [6.0, 7.0, 8.0],
             [9.0, 10.0, 11.0],
         ]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
 
         // Infer the dimension via -1
         let reshaped = tensor.clone().reshape([2, -1]);
@@ -73,16 +68,14 @@ mod tests {
     #[test]
     #[should_panic]
     fn multiple_neg_ones() {
-        let data = Data::from([0.0, 1.0, 2.0]);
-        let tensor = Tensor::<TestBackend, 1>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 1>::from([0.0, 1.0, 2.0]);
         let data_actual = tensor.reshape([-1, -1]).into_data();
     }
 
     #[test]
     #[should_panic]
     fn neg_value() {
-        let data = Data::from([0.0, 1.0, 2.0]);
-        let tensor = Tensor::<TestBackend, 1>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 1>::from([0.0, 1.0, 2.0]);
         let data_actual = tensor.reshape([-2, -1]).into_data();
     }
 }

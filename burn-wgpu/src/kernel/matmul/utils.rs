@@ -49,8 +49,8 @@ pub(crate) mod tests {
             burn_tensor::Distribution::Uniform(-1.0, 1.0),
         );
 
-        let x_wgpu = TestTensor::from_data_devauto(x.to_data()).into_primitive();
-        let y_wgpu = TestTensor::from_data_devauto(y.to_data()).into_primitive();
+        let x_wgpu = TestTensor::from(x.to_data()).into_primitive();
+        let y_wgpu = TestTensor::from(y.to_data()).into_primitive();
 
         let z_reference = x.matmul(y);
 
@@ -80,8 +80,8 @@ pub(crate) mod tests {
             burn_tensor::Distribution::Uniform(-1.0, 1.0),
         );
 
-        let x_wgpu = TestTensor::from_data_devauto(x.to_data()).swap_dims(swap_lhs[0], swap_lhs[1]);
-        let y_wgpu = TestTensor::from_data_devauto(y.to_data()).swap_dims(swap_rhs[0], swap_rhs[1]);
+        let x_wgpu = TestTensor::from(x.to_data()).swap_dims(swap_lhs[0], swap_lhs[1]);
+        let y_wgpu = TestTensor::from(y.to_data()).swap_dims(swap_rhs[0], swap_rhs[1]);
 
         let z_reference = x
             .swap_dims(swap_lhs[0], swap_lhs[1])

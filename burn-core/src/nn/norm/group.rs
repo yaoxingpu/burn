@@ -142,7 +142,7 @@ mod tests {
         assert!(module.gamma.is_none());
         assert!(module.beta.is_none());
 
-        let input = Tensor::from_data_devauto(Data::from([
+        let input = Tensor::from([
             [
                 [-0.3034, 0.2726, -0.9659],
                 [-1.1845, -1.3236, 0.0172],
@@ -159,7 +159,7 @@ mod tests {
                 [-0.9535, 0.1281, 0.4372],
                 [-0.2845, 0.3488, 0.5641],
             ],
-        ]));
+        ]);
 
         let output = module.forward(input);
 
@@ -208,7 +208,7 @@ mod tests {
             .to_data()
             .assert_approx_eq(&Data::zeros([6]), 3);
 
-        let input = Tensor::from_data_devauto(Data::from([
+        let input = Tensor::from(Data::from([
             [
                 [0.3345, 0.4429, 0.6639],
                 [0.5041, 0.4175, 0.8437],

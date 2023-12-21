@@ -61,7 +61,7 @@ mod tests {
         let max = shape[dim];
         let shape = Shape::new(shape);
         let tensor = Tensor::<TestBackend, D>::random_devauto(shape.clone(), Distribution::Default);
-        let indices = Tensor::<TestBackend, 1, Int>::from_data_devauto(
+        let indices = Tensor::<TestBackend, 1, Int>::from(
             Tensor::<TestBackend, 1>::random_devauto(
                 [shape.num_elements()],
                 Distribution::Uniform(0., max as f64),
@@ -70,9 +70,8 @@ mod tests {
             .convert(),
         )
         .reshape(shape);
-        let tensor_ref = Tensor::<ReferenceBackend, D>::from_data_devauto(tensor.to_data());
-        let indices_ref =
-            Tensor::<ReferenceBackend, D, Int>::from_data_devauto(indices.to_data().convert());
+        let tensor_ref = Tensor::<ReferenceBackend, D>::from(tensor.to_data());
+        let indices_ref = Tensor::<ReferenceBackend, D, Int>::from(indices.to_data().convert());
 
         let actual = Tensor::<TestBackend, D>::from_primitive(gather(
             dim,

@@ -81,7 +81,7 @@ mod tests {
             .collect::<Vec<_>>();
         let tensors_ref = tensors
             .iter()
-            .map(|tensor| Tensor::<ReferenceBackend, 2>::from_data_devauto(tensor.to_data()))
+            .map(|tensor| Tensor::<ReferenceBackend, 2>::from(tensor.to_data()))
             .collect::<Vec<_>>();
 
         let tensor = Tensor::<TestBackend, 2>::cat(tensors, dim);

@@ -9,9 +9,8 @@ mod tests {
 
     #[test]
     fn test_display_2d_int_tensor() {
-        let int_data = Data::from([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
         let tensor_int: burn_tensor::Tensor<TestBackend, 2, burn_tensor::Int> =
-            Tensor::from_data_devauto(int_data);
+            Tensor::from([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
 
         let output = format!("{}", tensor_int);
         let expected = format!(
@@ -35,9 +34,8 @@ mod tests {
 
     #[test]
     fn test_display_2d_float_tensor() {
-        let float_data = Data::from([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [7.7, 8.8, 9.9]]);
         let tensor_float: burn_tensor::Tensor<TestBackend, 2, burn_tensor::Float> =
-            Tensor::from_data_devauto(float_data);
+            Tensor::from([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [7.7, 8.8, 9.9]]);
 
         let output = format!("{}", tensor_float);
         let expected = format!(
@@ -61,13 +59,11 @@ mod tests {
 
     #[test]
     fn test_display_2d_bool_tensor() {
-        let bool_data = Data::from([
+        let tensor_bool: burn_tensor::Tensor<TestBackend, 2, burn_tensor::Bool> = Tensor::from([
             [true, false, true],
             [false, true, false],
             [false, true, true],
         ]);
-        let tensor_bool: burn_tensor::Tensor<TestBackend, 2, burn_tensor::Bool> =
-            Tensor::from_data_devauto(bool_data);
 
         let output = format!("{}", tensor_bool);
         let expected = format!(
@@ -90,12 +86,10 @@ mod tests {
 
     #[test]
     fn test_display_3d_tensor() {
-        let data = Data::from([
+        let tensor: burn_tensor::Tensor<TestBackend, 3, burn_tensor::Int> = Tensor::from([
             [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]],
             [[13, 14, 15, 16], [17, 18, 19, 20], [21, 22, 23, 24]],
         ]);
-        let tensor: burn_tensor::Tensor<TestBackend, 3, burn_tensor::Int> =
-            Tensor::from_data_devauto(data);
 
         let output = format!("{}", tensor);
         let expected = format!(
@@ -122,13 +116,10 @@ mod tests {
 
     #[test]
     fn test_display_4d_tensor() {
-        let data = Data::from([
+        let tensor: burn_tensor::Tensor<TestBackend, 4, burn_tensor::Int> = Tensor::from([
             [[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]],
             [[[13, 14, 15], [16, 17, 18]], [[19, 20, 21], [22, 23, 24]]],
         ]);
-
-        let tensor: burn_tensor::Tensor<TestBackend, 4, burn_tensor::Int> =
-            Tensor::from_data_devauto(data);
 
         let output = format!("{}", tensor);
         let expected = format!(

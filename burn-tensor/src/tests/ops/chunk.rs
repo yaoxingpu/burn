@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn test_chunk_multi_dimension() {
         let tensors: Vec<Tensor<TestBackend, 2, Int>> =
-            Tensor::from_data_devauto(Data::from([[0, 1, 2, 3]])).chunk(2, 1);
+            Tensor::from(Data::from([[0, 1, 2, 3]])).chunk(2, 1);
         assert_eq!(tensors.len(), 2);
 
         let expected = vec![Data::from([[0, 1]]), Data::from([[2, 3]])];

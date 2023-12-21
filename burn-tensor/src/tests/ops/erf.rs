@@ -5,8 +5,7 @@ mod tests {
 
     #[test]
     fn should_support_erf_ops() {
-        let data = Data::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]);
 
         let data_actual = tensor.erf().into_data();
 
@@ -16,8 +15,7 @@ mod tests {
 
     #[test]
     fn should_support_erf_ops_with_negative_number() {
-        let data = Data::from([[-0.056, -0.043, -0.089], [3.0, 4.0, 5.0]]);
-        let tensor = Tensor::<TestBackend, 2>::from_data_devauto(data);
+        let tensor = Tensor::<TestBackend, 2>::from([[-0.056, -0.043, -0.089], [3.0, 4.0, 5.0]]);
 
         let data_actual = tensor.erf().into_data();
 

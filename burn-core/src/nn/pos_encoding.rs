@@ -145,7 +145,7 @@ pub fn generate_sinusoids<B: Backend>(
         [length, d_model].into(),
     );
 
-    Tensor::<B, 2>::from_data_devauto(data.convert())
+    Tensor::<B, 2>::from(data.convert())
 }
 
 #[cfg(test)]
@@ -171,7 +171,7 @@ mod tests {
 
         assert_eq!(output.shape().dims, [batch_size, length, d_model]);
 
-        let expected = Tensor::<TestBackend, 3>::from_floats_devauto([
+        let expected = Tensor::<TestBackend, 3>::from([
             [
                 [0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 1.00000],
                 [0.84147, 0.54030, 0.04640, 0.99892, 0.00215, 1.00000],
@@ -192,7 +192,7 @@ mod tests {
         let sinusoids = generate_sinusoids::<TestBackend>(12, 6, 10_000);
 
         // The values are taken from the pytorch reference implementation
-        let expected = Tensor::<TestBackend, 2>::from_floats_devauto([
+        let expected = Tensor::<TestBackend, 2>::from([
             [0.00000, 1.00000, 0.00000, 1.00000, 0.00000, 1.00000],
             [0.84147, 0.54030, 0.04640, 0.99892, 0.00215, 1.00000],
             [0.90930, -0.41615, 0.09270, 0.99569, 0.00431, 0.99999],

@@ -141,9 +141,9 @@ mod tests {
         let mask =
             Tensor::<TestBackend, 3>::random_devauto([2, 6, 256], Distribution::Uniform(0., 1.))
                 .lower_equal_elem(0.5);
-        let tensor_ref = Tensor::<ReferenceBackend, 3>::from_data_devauto(tensor.to_data());
-        let value_ref = Tensor::<ReferenceBackend, 3>::from_data_devauto(value.to_data());
-        let mask_ref = Tensor::<ReferenceBackend, 3, Bool>::from_data_devauto(mask.to_data());
+        let tensor_ref = Tensor::<ReferenceBackend, 3>::from(tensor.to_data());
+        let value_ref = Tensor::<ReferenceBackend, 3>::from(value.to_data());
+        let mask_ref = Tensor::<ReferenceBackend, 3, Bool>::from(mask.to_data());
         assert_eq!(mask.to_data(), mask_ref.to_data());
 
         (tensor, value, mask, tensor_ref, value_ref, mask_ref)

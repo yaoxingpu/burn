@@ -70,7 +70,7 @@ pub fn generate_padding_mask<B: Backend>(
 
         tensor = tensor.slice_assign(
             [index..index + 1, 0..tokens.len()],
-            Tensor::from_data_devauto(Data::new(
+            Tensor::from(Data::new(
                 tokens.into_iter().map(|e| (e as i64).elem()).collect(),
                 Shape::new([1, seq_length]),
             )),

@@ -17,15 +17,15 @@ mod tests {
             length: 4,
         };
         let grads = Grads {
-            x: TestTensor::from_floats_devauto([
+            x: TestTensor::from([
                 [[14., 24., 24., 18.], [26., 42., 42., 30.]],
                 [[14., 24., 24., 18.], [26., 42., 42., 30.]],
             ]),
-            weight: TestTensor::from_floats_devauto([
+            weight: TestTensor::from([
                 [[30., 44., 36.], [54., 76., 60.]],
                 [[30., 44., 36.], [54., 76., 60.]],
             ]),
-            bias: TestTensor::from_floats_devauto([8., 8.]),
+            bias: TestTensor::from([8., 8.]),
         };
         test.assert_grads(grads);
     }
@@ -44,16 +44,16 @@ mod tests {
             length: 4,
         };
         let grads = Grads {
-            x: TestTensor::from_floats_devauto([
+            x: TestTensor::from([
                 [[39., 63., 63., 45.], [57., 90., 90., 63.]],
                 [[39., 63., 63., 45.], [57., 90., 90., 63.]],
             ]),
-            weight: TestTensor::from_floats_devauto([
+            weight: TestTensor::from([
                 [[30., 44., 36.], [54., 76., 60.]],
                 [[30., 44., 36.], [54., 76., 60.]],
                 [[30., 44., 36.], [54., 76., 60.]],
             ]),
-            bias: TestTensor::from_floats_devauto([8., 8., 8.]),
+            bias: TestTensor::from([8., 8., 8.]),
         };
         test.assert_grads(grads);
     }
@@ -72,15 +72,15 @@ mod tests {
             length: 4,
         };
         let grads = Grads {
-            x: TestTensor::from_floats_devauto([
+            x: TestTensor::from([
                 [[24., 24., 24., 24.], [42., 42., 42., 42.]],
                 [[24., 24., 24., 24.], [42., 42., 42., 42.]],
             ]),
-            weight: TestTensor::from_floats_devauto([
+            weight: TestTensor::from([
                 [[44., 44., 44.], [76., 76., 76.]],
                 [[44., 44., 44.], [76., 76., 76.]],
             ]),
-            bias: TestTensor::from_floats_devauto([12., 12.]),
+            bias: TestTensor::from([12., 12.]),
         };
         test.assert_grads(grads);
     }
@@ -99,15 +99,15 @@ mod tests {
             length: 4,
         };
         let grads = Grads {
-            x: TestTensor::from_floats_devauto([
+            x: TestTensor::from([
                 [[8., 16., 8., 10.], [14., 28., 14., 16.]],
                 [[8., 16., 8., 10.], [14., 28., 14., 16.]],
             ]),
-            weight: TestTensor::from_floats_devauto([
+            weight: TestTensor::from([
                 [[10., 20., 24.], [18., 36., 40.]],
                 [[10., 20., 24.], [18., 36., 40.]],
             ]),
-            bias: TestTensor::from_floats_devauto([4., 4.]),
+            bias: TestTensor::from([4., 4.]),
         };
         test.assert_grads(grads);
     }
@@ -126,15 +126,15 @@ mod tests {
             length: 4,
         };
         let grads = Grads {
-            x: TestTensor::from_floats_devauto([
+            x: TestTensor::from([
                 [[6., 8., 8., 10.], [12., 14., 14., 16.]],
                 [[6., 8., 8., 10.], [12., 14., 14., 16.]],
             ]),
-            weight: TestTensor::from_floats_devauto([
+            weight: TestTensor::from([
                 [[8., 22., 14.], [16., 38., 22.]],
                 [[8., 22., 14.], [16., 38., 22.]],
             ]),
-            bias: TestTensor::from_floats_devauto([4., 4.]),
+            bias: TestTensor::from([4., 4.]),
         };
         test.assert_grads(grads);
     }
@@ -153,12 +153,12 @@ mod tests {
             length: 4,
         };
         let grads = Grads {
-            x: TestTensor::from_floats_devauto([
+            x: TestTensor::from([
                 [[1., 3., 3., 3.], [7., 12., 12., 9.]],
                 [[1., 3., 3., 3.], [7., 12., 12., 9.]],
             ]),
-            weight: TestTensor::from_floats_devauto([[[30., 44., 36.]], [[54., 76., 60.]]]),
-            bias: TestTensor::from_floats_devauto([8., 8.]),
+            weight: TestTensor::from([[[30., 44., 36.]], [[54., 76., 60.]]]),
+            bias: TestTensor::from([8., 8.]),
         };
         test.assert_grads(grads);
     }
@@ -189,20 +189,20 @@ mod tests {
                 self.channels_in / self.groups,
                 self.kernel_size,
             ]);
-            let weight = TestAutodiffTensor::from_data_devauto(
+            let weight = TestAutodiffTensor::from(
                 TestTensorInt::arange_devauto(0..shape_weight.num_elements())
                     .reshape(shape_weight)
                     .into_data()
                     .convert(),
             )
             .require_grad();
-            let bias = TestAutodiffTensor::from_data_devauto(
+            let bias = TestAutodiffTensor::from(
                 TestTensorInt::arange_devauto(0..self.channels_out)
                     .into_data()
                     .convert(),
             )
             .require_grad();
-            let x = TestAutodiffTensor::from_data_devauto(
+            let x = TestAutodiffTensor::from(
                 TestTensorInt::arange_devauto(0..shape_x.num_elements())
                     .reshape(shape_x)
                     .into_data()

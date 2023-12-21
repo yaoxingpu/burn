@@ -5,11 +5,8 @@ mod tests {
 
     #[test]
     fn should_diff_full_complex_1() {
-        let data_1: Data<f32, 2> = Data::from([[1.0, 7.0], [13.0, -3.0]]);
-        let data_2: Data<f32, 2> = Data::from([[4.0, 7.0], [2.0, 3.0]]);
-
-        let tensor_1 = TestAutodiffTensor::from_data_devauto(data_1).require_grad();
-        let tensor_2 = TestAutodiffTensor::from_data_devauto(data_2).require_grad();
+        let tensor_1 = TestAutodiffTensor::from([[1.0, 7.0], [13.0, -3.0]]).require_grad();
+        let tensor_2 = TestAutodiffTensor::from([[4.0, 7.0], [2.0, 3.0]]).require_grad();
 
         let tensor_3 = tensor_1.clone().matmul(tensor_2.clone());
         let tensor_4 = tensor_3.matmul(tensor_1.clone());
@@ -32,11 +29,8 @@ mod tests {
 
     #[test]
     fn should_diff_full_complex_2() {
-        let data_1: Data<f32, 2> = Data::from([[1.0, 7.0], [13.0, -3.0]]);
-        let data_2: Data<f32, 2> = Data::from([[4.0, 7.0], [2.0, 3.0]]);
-
-        let tensor_1 = TestAutodiffTensor::from_data_devauto(data_1).require_grad();
-        let tensor_2 = TestAutodiffTensor::from_data_devauto(data_2).require_grad();
+        let tensor_1 = TestAutodiffTensor::from([[1.0, 7.0], [13.0, -3.0]]).require_grad();
+        let tensor_2 = TestAutodiffTensor::from([[4.0, 7.0], [2.0, 3.0]]).require_grad();
 
         let tensor_3 = tensor_1.clone().matmul(tensor_2.clone());
         let tensor_4 = tensor_3.matmul(tensor_1.clone());
@@ -56,11 +50,8 @@ mod tests {
 
     #[test]
     fn should_diff_full_complex_3() {
-        let data_1: Data<f32, 2> = Data::from([[1.0, 7.0], [13.0, -3.0]]);
-        let data_2: Data<f32, 2> = Data::from([[4.0, 7.0], [2.0, 3.0]]);
-
-        let tensor_1 = TestAutodiffTensor::from_data_devauto(data_1).require_grad();
-        let tensor_2 = TestAutodiffTensor::from_data_devauto(data_2).require_grad();
+        let tensor_1 = TestAutodiffTensor::from([[1.0, 7.0], [13.0, -3.0]]).require_grad();
+        let tensor_2 = TestAutodiffTensor::from([[4.0, 7.0], [2.0, 3.0]]).require_grad();
 
         let tensor_3 = tensor_1.clone().matmul(tensor_2.clone());
         let tensor_4 = tensor_3.matmul(tensor_1.clone());

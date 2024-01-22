@@ -3,6 +3,7 @@ use burn_tensor::backend::Backend;
 use crate::{
     grads::Gradients,
     graph::{
+        checkpoint::NodeStates,
         Node, NodeID, NodeRef, Requirement, {Graph, Step},
     },
 };
@@ -20,7 +21,7 @@ struct RootStep {
 }
 
 impl Step for RootStep {
-    fn step(self: Box<Self>, _grads: &mut Gradients) {
+    fn step(self: Box<Self>, _grads: &mut Gradients, states: &NodeStates) {
         // Nothing to do
     }
 
@@ -102,5 +103,9 @@ impl<B: Backend, const D: usize> AutodiffTensor<B, D> {
     pub fn register_step<O: Step + 'static>(mut self, ops: O) -> Self {
         self.graph = self.graph.register(&self.node.id, Box::new(ops));
         self
+    }
+
+    pub fn register_output(&self, output: B::TensorPrimitive<D>) {
+        self.graph.register_output::<B, D>(output, self.node.id);
     }
 }

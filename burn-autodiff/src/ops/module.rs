@@ -1,5 +1,5 @@
 use crate::grads::Gradients;
-use crate::ops::{unary, Backward, Ops};
+use crate::ops::{unary, Ops};
 use crate::tensor::AutodiffTensor;
 use crate::Autodiff;
 

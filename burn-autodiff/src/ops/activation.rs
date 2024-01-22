@@ -1,6 +1,6 @@
 use crate::{
     grads::Gradients,
-    ops::{unary, Backward, Ops, OpsKind},
+    ops::{unary, Ops, OpsKind},
     Autodiff,
 };
 use burn_tensor::{

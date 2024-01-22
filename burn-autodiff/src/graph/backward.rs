@@ -2,19 +2,21 @@ use burn_tensor::backend::Backend;
 
 use crate::{grads::Gradients, tensor::AutodiffTensor};
 
-use super::{traversal::BreadthFirstSearch, Graph, NodeRef, StepBoxed};
+use super::{
+    checkpoint::NodeStates, traversal::BreadthFirstSearch, Graph, Node, NodeRef, StepBoxed,
+};
 
 pub fn backward<B: Backend, const D: usize>(root: AutodiffTensor<B, D>) -> Gradients {
     let grads = Gradients::new::<B, D>(root.node.clone(), root.primitive);
     let tape = build_tape(root.node, root.graph);
 
-    execute_steps(tape, grads)
+    execute_steps(tape, grads, root.graph.node_states())
 }
 
 fn build_tape(root: NodeRef, graph: Graph) -> Vec<Vec<StepBoxed>> {
     let mut tape = (0..root.order)
         .map(|_| Vec::with_capacity(1))
-        .collect::<Vec<_>>();
+       .collect::<Vec<_>>();
 
     BreadthFirstSearch.traverse(root, graph, |node, step| {
         if node.order == 0 {
@@ -29,9 +31,15 @@ fn build_tape(root: NodeRef, graph: Graph) -> Vec<Vec<StepBoxed>> {
     tape
 }
 
-fn execute_steps(tape: Vec<Vec<StepBoxed>>, mut grads: Gradients) -> Gradients {
-    tape.into_iter()
-        .rev()
-        .for_each(|steps| steps.into_iter().for_each(|step| step.step(&mut grads)));
+fn execute_steps(
+    tape: Vec<Vec<StepBoxed>>,
+    mut grads: Gradients,
+    states: &NodeStates,
+) -> Gradients {
+    tape.into_iter().rev().for_each(|steps| {
+        steps
+            .into_iter()
+            .for_each(|step| step.step(&mut grads, states))
+    });
     grads
 }

@@ -1,7 +1,10 @@
 use super::{Ops, OpsPrep};
 use crate::{
     grads::Gradients,
-    graph::{Graph, NodeRef, Requirement},
+    graph::{
+        checkpoint::{Bottleneck, NodeStates},
+        Graph, NodeRef, Requirement,
+    },
     utils::duplicate,
 };
 use burn_tensor::backend::Backend;
@@ -13,23 +16,33 @@ use burn_tensor::backend::Backend;
 /// Concrete types implementing this trait should not have any state.
 /// If a state is necessary during the backward pass,
 /// they should be declared with the associated type 'State'.
-pub trait Backward<B, const D: usize, const N: usize>: Send + Sync + std::fmt::Debug
+pub trait OpsSpec<B, const D: usize, const N: usize>: Send + Sync + std::fmt::Debug
 where
     Self: Sized + 'static,
     B: Backend,
 {
     /// Associated type to compute the backward pass.
-    type State: Clone + Send + Sync + std::fmt::Debug + 'static;
+    type Input: Clone + Send + Sync + std::fmt::Debug + 'static;
+    type Output: Clone + Send + Sync + std::fmt::Debug + 'static;
+
+    fn forward(&self, input: Self::Input) -> Self::Output;
 
     /// The backward pass.
-    fn backward(self, ops: Ops<Self::State, N>, grads: &mut Gradients);
+    fn backward(
+        self,
+        ops: Ops<Self::Input, Self::Output, N>,
+        grads: &mut Gradients,
+        states: &NodeStates,
+    );
+
+    fn bottleneck(&self) -> Bottleneck;
 
     /// Prepare the backward ops.
     fn prepare(
         self,
         nodes: [NodeRef; N],
         graphs: [Graph; N],
-    ) -> OpsPrep<Self, B, Self::State, D, N> {
+    ) -> OpsPrep<Self, B, Self::Input, Self::Output, D, N> {
         let requirement = Requirement::from_nodes(&nodes);
         OpsPrep::new(nodes, graphs, requirement, self)
     }

@@ -1,5 +1,5 @@
 mod activation;
-mod backward;
+mod ops_spec;
 mod base;
 mod bool_tensor;
 mod int_tensor;
@@ -8,5 +8,5 @@ mod tensor;
 
 pub(crate) mod maxmin;
 
-pub use backward::*;
+pub use ops_spec::*;
 pub use base::*;

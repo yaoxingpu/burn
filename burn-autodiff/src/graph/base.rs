@@ -1,14 +1,18 @@
-use spin::Mutex;
+use burn_tensor::backend::Backend;
+use spin::{Mutex, RwLock};
 use std::{collections::HashMap, sync::Arc};
 
 use crate::grads::Gradients;
 
-use super::{NodeID, NodeRef};
+use super::{
+    checkpoint::{NodeStates, StateStruct},
+    NodeID, NodeRef,
+};
 
 /// Backward step for reverse mode autodiff.
 pub trait Step: Send + Sync + std::fmt::Debug {
     /// Executes the step and consumes it.
-    fn step(self: Box<Self>, grads: &mut Gradients);
+    fn step(self: Box<Self>, grads: &mut Gradients, states: &NodeStates);
     /// The node associated to the step.
     fn node(&self) -> NodeRef;
 }
@@ -22,6 +26,7 @@ pub type NodeSteps = HashMap<NodeID, StepBoxed>;
 #[derive(Default, Clone, Debug)]
 pub struct Graph {
     steps: Arc<Mutex<NodeSteps>>,
+    states: Arc<RwLock<NodeStates>>,
 }
 
 impl Graph {
@@ -92,5 +97,19 @@ impl Graph {
                 std::mem::swap(map1, &mut map2);
             }
         })
+    }
+
+    pub fn register_output<B: Backend, const D: usize>(
+        &self,
+        output: B::TensorPrimitive<D>,
+        node: NodeID,
+    ) {
+        self.states
+            .get_mut()
+            .register(node, Box::new(StateStruct::<B, D>::new(output)))
+    }
+
+    pub(crate) fn node_states(&self) -> &NodeStates {
+        &*self.states.read()
     }
 }

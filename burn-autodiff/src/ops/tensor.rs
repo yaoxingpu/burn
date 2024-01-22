@@ -2,8 +2,11 @@ use std::{marker::PhantomData, process::Output};
 
 use crate::{
     grads::Gradients,
-    graph::{Graph, NodeRef, Requirement, Step},
-    ops::{binary, broadcast_shape, unary, unary_different_backend, Backward, Ops, OpsKind},
+    graph::{
+        checkpoint::{Bottleneck, NodeStates},
+        Graph, NodeRef, Requirement, Step,
+    },
+    ops::{binary, broadcast_shape, unary, unary_different_backend, Ops, OpsKind, OpsSpec},
     tensor::AutodiffTensor,
     utils::duplicate,
     Autodiff,
@@ -291,16 +294,20 @@ impl<B: Backend> TensorOps<Self> for Autodiff<B> {
         #[derive(Debug)]
         struct Div;
 
-        impl<B: Backend, const D: usize> Backward<B, D, 2> for Div {
-            type State = (
-                Option<B::TensorPrimitive<D>>,
-                Option<B::TensorPrimitive<D>>,
-                BinaryOpsBroadcast<D>,
-            );
+        impl<B: Backend, const D: usize> OpsSpec<B, D, 2> for Div {
+            type Input = (B::TensorPrimitive<D>, B::TensorPrimitive<D>);
+            type Output = B::TensorPrimitive<D>;
 
-            fn backward(self, ops: Ops<Self::State, 2>, grads: &mut Gradients) {
-                let (lhs, rhs, broadcast) = ops.state;
-                let [rhs_4lhs, rhs_4rhs] = duplicate(&ops.parents, rhs);
+            fn backward(
+                self,
+                ops: Ops<Self::Input, Self::Output, 2>,
+                grads: &mut Gradients,
+                states: &NodeStates,
+            ) {
+                // let (lhs, rhs, broadcast) = ops.state;
+                let (lhs, rhs) = ops.fetch_inputs(states);
+                let broadcast = BinaryOpsBroadcast::new::<B>(&lhs, &rhs);
+                let [rhs_4lhs, rhs_4rhs] = duplicate(&ops.parents, Some(rhs));
 
                 binary::<B, D, D, D, _, _>(
                     ops.parents,
@@ -315,13 +322,21 @@ impl<B: Backend> TensorOps<Self> for Autodiff<B> {
                     },
                     |grad| {
                         let rhs = rhs_4rhs.unwrap();
-                        let lhs = lhs.unwrap();
                         let value = B::div(B::neg(lhs), B::powf(rhs, 2.0));
                         let grad = B::mul(grad, value);
 
                         broadcast.backward_rhs::<B>(grad)
                     },
                 );
+            }
+
+            fn forward(&self, input: Self::Input) -> Self::Output {
+                let (lhs, rhs) = input;
+                B::div(lhs, rhs)
+            }
+
+            fn bottleneck(&self) -> Bottleneck {
+                Bottleneck::ComputeBound
             }
         }
 
@@ -333,14 +348,7 @@ impl<B: Backend> TensorOps<Self> for Autodiff<B> {
             .prepare([lhs.node, rhs.node], [lhs.graph, rhs.graph])
             .stateful()
         {
-            OpsKind::Tracked(prep) => prep.finish(
-                (
-                    rhs_tracked.then(|| lhs.primitive.clone()),
-                    (lhs_tracked || rhs_tracked).then(|| rhs.primitive.clone()),
-                    broadcast,
-                ),
-                B::div(lhs.primitive, rhs.primitive),
-            ),
+            OpsKind::Tracked(prep) => prep.finish(Some(Div), B::div(lhs.primitive, rhs.primitive)),
             OpsKind::UnTracked(prep) => prep.finish(B::div(lhs.primitive, rhs.primitive)),
         }
     }

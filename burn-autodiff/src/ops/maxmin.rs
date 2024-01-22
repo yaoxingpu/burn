@@ -1,4 +1,4 @@
-use super::{unary, Backward, Ops};
+use super::{unary, Ops};
 use crate::grads::Gradients;
 use burn_tensor::{backend::Backend, Shape};
 

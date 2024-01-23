@@ -5,7 +5,7 @@ use std::{collections::HashMap, sync::Arc};
 use crate::grads::Gradients;
 
 use super::{
-    checkpoint::{NodeStates, StateStruct},
+    checkpoint::{NodeStates, OperationBoxed, StateStruct},
     NodeID, NodeRef,
 };
 
@@ -103,10 +103,13 @@ impl Graph {
         &self,
         output: B::TensorPrimitive<D>,
         node: NodeID,
+        operation: OperationBoxed,
     ) {
-        self.states
-            .get_mut()
-            .register(node, Box::new(StateStruct::<B, D, 1>::new([output])))
+        self.states.get_mut().register(
+            node,
+            Box::new(StateStruct::<B, D, 1>::new([output].into())),
+            operation,
+        )
     }
 
     pub(crate) fn node_states(&self) -> &NodeStates {

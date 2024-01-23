@@ -3,7 +3,7 @@ use burn_tensor::backend::Backend;
 use crate::{
     grads::Gradients,
     graph::{
-        checkpoint::NodeStates,
+        checkpoint::{NodeStates, OperationBoxed},
         Node, NodeID, NodeRef, Requirement, {Graph, Step},
     },
 };
@@ -105,7 +105,8 @@ impl<B: Backend, const D: usize> AutodiffTensor<B, D> {
         self
     }
 
-    pub fn register_output(&self, output: B::TensorPrimitive<D>) {
-        self.graph.register_output::<B, D>(output, self.node.id);
+    pub fn register_output(&self, output: B::TensorPrimitive<D>, operation: OperationBoxed) {
+        self.graph
+            .register_output::<B, D>(output, self.node.id, operation);
     }
 }

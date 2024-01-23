@@ -6,7 +6,7 @@ use crate::{
         checkpoint::{Bottleneck, NodeStates, StateStruct},
         Graph, NodeRef, Requirement, Step,
     },
-    ops::{binary, broadcast_shape, unary, unary_different_backend, Ops, OpsKind, OpsSpec},
+    ops::{binary, broadcast_shape, tensor, unary, unary_different_backend, Ops, OpsKind, OpsSpec},
     tensor::AutodiffTensor,
     utils::duplicate,
     Autodiff,
@@ -305,7 +305,9 @@ impl<B: Backend> TensorOps<Self> for Autodiff<B> {
                 states: &NodeStates,
             ) {
                 // let (lhs, rhs, broadcast) = ops.state;
-                let [lhs, rhs] = ops.fetch_inputs(states).tensors;
+                let tensors = ops.fetch_inputs(states).tensors;
+                let lhs = tensors[0];
+                let rhs = tensors[1];
                 let broadcast = BinaryOpsBroadcast::new::<B>(&lhs, &rhs);
                 let [rhs_4lhs, rhs_4rhs] = duplicate(&ops.parents, Some(rhs));
 
@@ -331,9 +333,9 @@ impl<B: Backend> TensorOps<Self> for Autodiff<B> {
             }
 
             fn forward(&self, input: Self::Input) -> Self::Output {
-                let [lhs, rhs] = input.tensors;
+                let (lhs, rhs) = (input.tensors[0], input.tensors[1]);
                 let result = B::div(lhs, rhs);
-                StateStruct::new([result])
+                StateStruct::new([result].into())
             }
 
             fn bottleneck(&self) -> Bottleneck {

@@ -1,12 +1,13 @@
 use crate::{
     grads::Gradients,
     graph::{
-        checkpoint::{NodeStates, State, StateNull},
+        checkpoint::{NodeStates, State, StateBoxed, StateNull},
         NodeRef, Requirement, {Graph, Step},
     },
     tensor::AutodiffTensor,
 };
 use burn_tensor::{backend::Backend, ops, Shape};
+use std::any::Any;
 use std::{marker::PhantomData, process::Output};
 
 use super::OpsSpec;
@@ -121,7 +122,7 @@ where
                 let ops = Ops::new(parents, autodiff_tensor.node.clone(), ops_spec);
                 match ops_spec.bottleneck() {
                     ComputeBound => {
-                        autodiff_tensor.register_output(output);
+                        autodiff_tensor.register_output(output, Box::new(ops));
                     }
                     MemoryBound => {}
                 }
@@ -171,8 +172,34 @@ where
         states.get_input::<B, OS, I, O, D, N>(self.node)
     }
 
-    pub(crate) fn forward(&self, inputs: I) -> O {
-        self.ops_spec.forward(inputs)
+    // pub(crate) fn forward(&self, inputs: I) -> O {
+    //
+    // }
+}
+
+pub trait Operation: Send + Sync + std::fmt::Debug + 'static {
+    fn node(&self) -> NodeRef;
+    fn forward(&self, input: StateBoxed) -> StateBoxed;
+}
+
+impl<B, OS, I, O, const D: usize, const N: usize> Operation for Ops<B, OS, I, O, D, N>
+where
+    B: Backend,
+    OS: OpsSpec<B, D, N, Input = I, Output = O>,
+    I: State,
+    O: State,
+{
+    fn node(&self) -> NodeRef {
+        self.node
+    }
+
+    fn forward(&self, input: StateBoxed) -> StateBoxed {
+        // ouch
+        let x = *input
+            .as_any()
+            .downcast_ref::<I>()
+            .expect("Downcast did not work");
+        Box::new(self.ops_spec.forward(x))
     }
 }
 

@@ -106,7 +106,7 @@ impl Graph {
     ) {
         self.states
             .get_mut()
-            .register(node, Box::new(StateStruct::<B, D>::new(output)))
+            .register(node, Box::new(StateStruct::<B, D, 1>::new([output])))
     }
 
     pub(crate) fn node_states(&self) -> &NodeStates {

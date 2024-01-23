@@ -2,7 +2,7 @@ use super::{Ops, OpsPrep};
 use crate::{
     grads::Gradients,
     graph::{
-        checkpoint::{Bottleneck, NodeStates},
+        checkpoint::{Bottleneck, NodeStates, State},
         Graph, NodeRef, Requirement,
     },
     utils::duplicate,
@@ -22,15 +22,15 @@ where
     B: Backend,
 {
     /// Associated type to compute the backward pass.
-    type Input: Clone + Send + Sync + std::fmt::Debug + 'static;
-    type Output: Clone + Send + Sync + std::fmt::Debug + 'static;
+    type Input: State;
+    type Output: State;
 
     fn forward(&self, input: Self::Input) -> Self::Output;
 
     /// The backward pass.
     fn backward(
         self,
-        ops: Ops<Self::Input, Self::Output, N>,
+        ops: Ops<B, Self, Self::Input, Self::Output, D, N>,
         grads: &mut Gradients,
         states: &NodeStates,
     );

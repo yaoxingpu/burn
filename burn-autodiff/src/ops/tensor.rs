@@ -3,7 +3,7 @@ use std::{marker::PhantomData, process::Output};
 use crate::{
     grads::Gradients,
     graph::{
-        checkpoint::{Bottleneck, NodeStates},
+        checkpoint::{Bottleneck, NodeStates, StateStruct},
         Graph, NodeRef, Requirement, Step,
     },
     ops::{binary, broadcast_shape, unary, unary_different_backend, Ops, OpsKind, OpsSpec},
@@ -295,17 +295,17 @@ impl<B: Backend> TensorOps<Self> for Autodiff<B> {
         struct Div;
 
         impl<B: Backend, const D: usize> OpsSpec<B, D, 2> for Div {
-            type Input = (B::TensorPrimitive<D>, B::TensorPrimitive<D>);
-            type Output = B::TensorPrimitive<D>;
+            type Input = StateStruct<B, D, 2>;
+            type Output = StateStruct<B, D, 1>;
 
             fn backward(
                 self,
-                ops: Ops<Self::Input, Self::Output, 2>,
+                ops: Ops<B, Self, Self::Input, Self::Output, D, 2>,
                 grads: &mut Gradients,
                 states: &NodeStates,
             ) {
                 // let (lhs, rhs, broadcast) = ops.state;
-                let (lhs, rhs) = ops.fetch_inputs(states);
+                let [lhs, rhs] = ops.fetch_inputs(states).tensors;
                 let broadcast = BinaryOpsBroadcast::new::<B>(&lhs, &rhs);
                 let [rhs_4lhs, rhs_4rhs] = duplicate(&ops.parents, Some(rhs));
 
@@ -331,8 +331,9 @@ impl<B: Backend> TensorOps<Self> for Autodiff<B> {
             }
 
             fn forward(&self, input: Self::Input) -> Self::Output {
-                let (lhs, rhs) = input;
-                B::div(lhs, rhs)
+                let [lhs, rhs] = input.tensors;
+                let result = B::div(lhs, rhs);
+                StateStruct::new([result])
             }
 
             fn bottleneck(&self) -> Bottleneck {

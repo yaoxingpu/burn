@@ -1,7 +1,7 @@
 use crate::{
     grads::Gradients,
     graph::{
-        checkpoint::NodeStates,
+        checkpoint::{NodeStates, State, StateNull},
         NodeRef, Requirement, {Graph, Step},
     },
     tensor::AutodiffTensor,
@@ -34,10 +34,12 @@ pub struct Tracked;
 /// Untracked operation tag.
 pub struct UnTracked;
 
-impl<OS, B, const D: usize, const N: usize> OpsPrep<OS, B, (), (), D, N, Init>
+impl<OS, B, const D: usize, const N: usize, I, O> OpsPrep<OS, B, I, O, D, N, Init>
 where
     B: Backend,
-    OS: OpsSpec<B, D, N, Input = (), Output = ()>,
+    OS: OpsSpec<B, D, N, Input = I, Output = O>,
+    I: State,
+    O: State,
 {
     /// Prepare a stateless operation.
     pub fn stateless(self, output: <B as Backend>::TensorPrimitive<D>) -> AutodiffTensor<B, D> {
@@ -52,8 +54,8 @@ impl<OS, B, const D: usize, const N: usize, I, O> OpsPrep<OS, B, I, O, D, N, Ini
 where
     B: Backend,
     OS: OpsSpec<B, D, N, Input = I, Output = O>,
-    I: Clone + Send + Sync + std::fmt::Debug + 'static,
-    O: Clone + Send + Sync + std::fmt::Debug + 'static,
+    I: State,
+    O: State,
 {
     /// Prepare an operation that requires a state during the backward pass.
     pub fn stateful(self) -> OpsKind<OS, B, I, O, D, N> {
@@ -78,8 +80,8 @@ impl<OS, B, const D: usize, const N: usize, I, O> OpsPrep<OS, B, I, O, D, N, UnT
 where
     B: Backend,
     OS: OpsSpec<B, D, N, Input = I, Output = O>,
-    I: Clone + Send + Sync + std::fmt::Debug + 'static,
-    O: Clone + Send + Sync + std::fmt::Debug + 'static,
+    I: State,
+    O: State,
 {
     /// Finish the preparation of an untracked operation and returns the output tensor.
     pub fn finish(self, output: <B as Backend>::TensorPrimitive<D>) -> AutodiffTensor<B, D> {
@@ -96,8 +98,8 @@ impl<OS, B, const D: usize, const N: usize, I, O> OpsPrep<OS, B, I, O, D, N, Tra
 where
     B: Backend,
     OS: OpsSpec<B, D, N, Input = I, Output = O>,
-    I: Clone + Send + Sync + std::fmt::Debug + 'static,
-    O: Clone + Send + Sync + std::fmt::Debug + 'static,
+    I: State,
+    O: State,
 {
     /// Finish the preparation of a tracked operation and returns the output tensor.
     pub fn finish(
@@ -112,24 +114,21 @@ where
             self.graphs.into_iter(),
             self.requirement,
         );
-        let parents = self.nodes.map(|node| node.clone_if_require_grad());
-        let ops = Ops::new(parents, autodiff_tensor.node.clone());
-        // probably should have ops_spec in order to recompute stuff
-        // let ops = Ops::new(parents, autodiff_tensor.node.clone(), ops_spec);
 
-        // Access autodiff_tensor.graph, ask it to register
-        // <nodeid, output>, nodeid inside tensor
         match ops_spec {
-            Some(ops_spec) => match ops_spec.bottleneck() {
-                ComputeBound => {
-                    autodiff_tensor.register_output(output);
+            Some(ops_spec) => {
+                let parents = self.nodes.map(|node| node.clone_if_require_grad());
+                let ops = Ops::new(parents, autodiff_tensor.node.clone(), ops_spec);
+                match ops_spec.bottleneck() {
+                    ComputeBound => {
+                        autodiff_tensor.register_output(output);
+                    }
+                    MemoryBound => {}
                 }
-                MemoryBound => {}
-            },
-            None => {}
+                autodiff_tensor.register_step(OpsStep::new(ops, ops_spec))
+            }
+            None => autodiff_tensor,
         }
-
-        autodiff_tensor.register_step(OpsStep::new(ops, self.ops_spec))
     }
 }
 
@@ -143,36 +142,51 @@ pub enum OpsKind<OS, B, I, O, const D: usize, const N: usize> {
 
 /// Operation containing its parent nodes, its own node and the backward step state.
 #[derive(new, Debug)]
-pub struct Ops<I, O, const N: usize> {
+// pub struct Ops<OS, I, O, const N: usize> {
+pub struct Ops<B, OS, I, O, const D: usize, const N: usize>
+where
+    B: Backend,
+    OS: OpsSpec<B, D, N, Input = I, Output = O>,
+    I: State,
+    O: State,
+{
     /// Parents nodes.
     pub parents: [Option<NodeRef>; N],
     /// The node.
     pub node: NodeRef,
+    pub ops_spec: OS,
+    pub _backend: PhantomData<B>,
     pub _input: PhantomData<I>,
     pub _output: PhantomData<O>,
 }
 
-impl<I, O, const N: usize> Ops<I, O, N> {
+impl<B, OS, I, O, const D: usize, const N: usize> Ops<B, OS, I, O, D, N>
+where
+    B: Backend,
+    OS: OpsSpec<B, D, N, Input = I, Output = O>,
+    I: State,
+    O: State,
+{
     pub fn fetch_inputs(&self, states: &NodeStates) -> I {
-        states.get_input(self.node)
+        states.get_input::<B, OS, I, O, D, N>(self.node)
     }
 
-    pub(crate) fn forward(&self, inputs: Vec<Box<dyn State>>) -> dyn State {
+    pub(crate) fn forward(&self, inputs: I) -> O {
         self.ops_spec.forward(inputs)
     }
 }
 
 /// Operation implementing backward [step](Step) with type erasing.
 #[derive(new, Debug)]
-struct OpsStep<B, T, I, O, const D: usize, const N: usize>
+struct OpsStep<B, OS, I, O, const D: usize, const N: usize>
 where
     B: Backend,
-    T: OpsSpec<B, D, N, Input = I, Output = O>,
-    I: Clone + Send + Sync + std::fmt::Debug + 'static,
-    O: Clone + Send + Sync + std::fmt::Debug + 'static,
+    OS: OpsSpec<B, D, N, Input = I, Output = O>,
+    I: State,
+    O: State,
 {
-    ops: Ops<I, O, N>,
-    backward: T,
+    ops: Ops<B, OS, I, O, D, N>,
+    backward: OS,
     phantom: PhantomData<B>,
 }
 
@@ -180,8 +194,8 @@ impl<B, T, I, O, const D: usize, const N: usize> Step for OpsStep<B, T, I, O, D,
 where
     B: Backend,
     T: OpsSpec<B, D, N, Input = I, Output = O>,
-    I: Clone + Send + Sync + std::fmt::Debug + 'static,
-    O: Clone + Send + Sync + std::fmt::Debug + 'static,
+    I: State,
+    O: State,
 {
     fn step(self: Box<Self>, grads: &mut Gradients, states: &NodeStates) {
         self.backward.backward(self.ops, grads, states);

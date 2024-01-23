@@ -2,7 +2,7 @@ use std::{collections::HashMap, fmt::Debug};
 
 use burn_tensor::backend::Backend;
 
-use crate::ops::Ops;
+use crate::ops::{Ops, OpsSpec};
 
 use super::{NodeID, NodeRef};
 
@@ -27,14 +27,19 @@ pub enum Bottleneck {
 // //     Manual,
 // // }
 
-pub trait State: Sync + Send + Debug {}
+pub trait State: Send + Sync + Debug + 'static {}
 
-#[derive(new, Debug)]
-pub struct StateStruct<B: Backend, const D: usize> {
-    tensor: B::TensorPrimitive<D>,
+#[derive(new, Debug, Clone)]
+pub struct StateStruct<B: Backend, const D: usize, const N: usize> {
+    pub tensors: [B::TensorPrimitive<D>; N],
 }
 
-impl<B: Backend, const D: usize> State for StateStruct<B, D> {}
+impl<B: Backend, const D: usize, const N: usize> State for StateStruct<B, D, N> {}
+
+// Not sure necessary, delete if possible
+#[derive(new, Debug, Clone)]
+pub struct StateNull {}
+impl State for StateNull {}
 
 #[derive(Default, Debug)]
 pub struct NodeStates {
@@ -48,21 +53,34 @@ impl NodeStates {
         self.hashmap.insert(node_id, state);
     }
 
-    pub fn get_input(&self, node: NodeRef) -> Vec<StateBoxed> {
+    pub fn get_input<B, OS, I, O, const D: usize, const N: usize>(&self, node: NodeRef) -> I
+    where
+        B: Backend,
+        OS: OpsSpec<B, D, N, Input = I, Output = O>,
+        I: State,
+        O: State,
+    {
         node.parents
             .iter()
-            .map(|parent| self.get_output(parent))
+            .map(|parent| self.get_output::<B, OS, I, O, D, N>(parent))
             .collect()
     }
 
-    pub fn get_output(&self, node_id: &NodeID) -> StateBoxed {
+    pub fn get_output<B, OS, I, O, const D: usize, const N: usize>(
+        &self,
+        node_id: &NodeID,
+    ) -> StateBoxed
+    where
+        B: Backend,
+        OS: OpsSpec<B, D, N, Input = I, Output = O>,
+        I: State,
+        O: State,
+    {
         match self.hashmap.remove(node_id) {
             Some(state) => state,
             None => {
-                // TODO not <_, _, 1>
-                let ops: Ops<_, _, 1> = self.get_ops_from_node_id(node_id);
-                let inputs = self.get_input(ops.node);
-                //node forward does not exist
+                let ops: Ops<B, OS, I, O, D, N> = self.get_ops_from_node_id(node_id);
+                let inputs = self.get_input::<B, OS, I, O, D, N>(ops.node);
                 Box::new(ops.forward(inputs))
             }
         }
@@ -71,7 +89,22 @@ impl NodeStates {
     // NodeStates must have access to a mapping from NodeRef/NodeID to Ops
     // Otherwise how to get parents just with ids?
     // And how to do the forward pass ?
-    fn get_ops_from_node_id<I, O, const N: usize>(&self, node_id: &NodeID) -> Ops<I, O, N> {
+    fn get_ops_from_node_id<B, OS, I, O, const D: usize, const N: usize>(
+        &self,
+        node_id: &NodeID,
+    ) -> Ops<B, OS, I, O, D, N>
+    where
+        OS: OpsSpec<B, D, N, Input = I, Output = O>,
+        B: Backend,
+        I: State,
+        O: State,
+    {
         todo!()
     }
 }
+
+// STILL TO DO
+
+// - Collect several Os into an I
+// - node_id -> map of node_id -> Ops
+//      when registering, pass a pointer to the ops too

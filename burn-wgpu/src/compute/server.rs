@@ -9,7 +9,7 @@ use burn_tensor::Reader;
 use hashbrown::HashMap;
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
-    BindGroup, CommandEncoder, ComputePipeline, ShaderModuleDescriptor,
+    BindGroup, BindGroupLayout, CommandEncoder, ComputePipeline, ShaderModuleDescriptor,
 };
 
 /// Wgpu compute server.
@@ -19,7 +19,7 @@ pub struct WgpuServer<MM: MemoryManagement<WgpuStorage>> {
     device: Arc<wgpu::Device>,
     queue: wgpu::Queue,
     encoder: CommandEncoder,
-    pipelines: HashMap<String, Arc<ComputePipeline>>,
+    kernels: HashMap<String, Arc<CachedKernel>>,
     tasks: Vec<ComputeTask>,
     max_tasks: usize,
     manual_available: HashMap<usize, Vec<server::Handle<Self>>>,
@@ -27,8 +27,14 @@ pub struct WgpuServer<MM: MemoryManagement<WgpuStorage>> {
 }
 
 #[derive(new, Debug)]
+struct CachedKernel {
+    pipeline: ComputePipeline,
+    layout: BindGroupLayout,
+}
+
+#[derive(new, Debug)]
 struct ComputeTask {
-    pipeline: Arc<ComputePipeline>,
+    pipeline: Arc<CachedKernel>,
     bind_group: BindGroup,
     work_group: WorkGroup,
 }
@@ -94,7 +100,7 @@ where
             device,
             queue,
             encoder,
-            pipelines: HashMap::new(),
+            kernels: HashMap::new(),
             tasks: Vec::new(),
             max_tasks,
             manual_available: HashMap::new(),
@@ -170,7 +176,7 @@ where
             });
 
         for task in self.tasks.iter() {
-            compute.set_pipeline(&task.pipeline);
+            compute.set_pipeline(&task.pipeline.pipeline);
             compute.set_bind_group(0, &task.bind_group, &[]);
             compute.dispatch_workgroups(task.work_group.x, task.work_group.y, task.work_group.z);
         }
@@ -179,34 +185,37 @@ where
         self.tasks.clear();
     }
 
-    fn pipeline(&mut self, kernel: Box<dyn Kernel>) -> Arc<ComputePipeline> {
+    fn kernel(&mut self, kernel: Box<dyn Kernel>) -> Arc<CachedKernel> {
         let kernel_id = kernel.id();
-        if let Some(pipeline) = self.pipelines.get(&kernel_id) {
+        if let Some(pipeline) = self.kernels.get(&kernel_id) {
             return pipeline.clone();
         }
 
         let source = kernel.source().complete();
         let pipeline = self.compile_source(&source);
-        self.pipelines.insert(kernel_id.clone(), pipeline.clone());
+        self.kernels.insert(kernel_id.clone(), pipeline.clone());
 
         pipeline
     }
 
-    fn compile_source(&self, source: &str) -> Arc<ComputePipeline> {
+    fn compile_source(&self, source: &str) -> Arc<CachedKernel> {
         let module = self.device.create_shader_module(ShaderModuleDescriptor {
             label: None,
             source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(source)),
         });
 
-        Arc::new(
-            self.device
-                .create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-                    label: None,
-                    layout: None,
-                    module: &module,
-                    entry_point: "main",
-                }),
-        )
+        let pipeline = self
+            .device
+            .create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: None,
+                layout: None,
+                module: &module,
+                entry_point: "main",
+            });
+
+        let bind_group = pipeline.get_bind_group_layout(0);
+
+        Arc::new(CachedKernel::new(pipeline, bind_group))
     }
 
     fn buffer_reader(&mut self, handle: &server::Handle<Self>) -> BufferReader {
@@ -332,8 +341,7 @@ where
 
     fn execute(&mut self, kernel: Self::Kernel, handles: &[&server::Handle<Self>]) {
         let work_group = kernel.workgroup();
-        let pipeline = self.pipeline(kernel);
-        let group_layout = pipeline.get_bind_group_layout(0);
+        let kernel = self.kernel(kernel);
 
         let handles = handles
             .iter()
@@ -351,12 +359,12 @@ where
 
         let bind_group = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
-            layout: &group_layout,
+            layout: &kernel.layout,
             entries: &entries,
         });
 
         self.tasks
-            .push(ComputeTask::new(pipeline, bind_group, work_group));
+            .push(ComputeTask::new(kernel, bind_group, work_group));
 
         if self.tasks.len() >= self.max_tasks {
             self.register_tasks();

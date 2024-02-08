@@ -22,7 +22,7 @@ pytorch = ["burn/record-item-custom-serde", "thiserror"]
 burn = { path = "../burn", version = "0.13.0", features = ["ndarray"] }
 
 bytemuck = { workspace = true }
-candle-core = { workspace = true }
+candle-core = { git = "https://github.com/huggingface/candle.git", rev = "020a979de2e0d17b5c1a38bb9f40f4de73954cd5" }
 derive-new = { workspace = true }
 half = { workspace = true }
 log = { workspace = true }

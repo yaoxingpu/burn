@@ -1,3 +1,5 @@
+use core::marker::PhantomData;
+
 use alloc::string::String;
 
 use crate::ops::*;
@@ -62,6 +64,7 @@ pub trait Backend:
     + Sync
     + core::fmt::Debug
     + 'static
+    + BackendMovement<Self, f32, i32>
 {
     /// Device type.
     type Device: Clone + Default + PartialEq + core::fmt::Debug + Send + Sync;
@@ -97,6 +100,39 @@ pub trait Backend:
 
     /// Sync the backend, ensure that all computation are finished.
     fn sync(_device: &Self::Device) {}
+
+    fn move_float<const D: usize, TF: Element, TI: Element>(
+        tensor: FloatTensor<Self, D>,
+    ) -> FloatTensor<<Self as BackendMovement<Self, TF, TI>>::TargetBackend, D>
+    where
+        Self: BackendMovement<Self, TF, TI>,
+    {
+        <Self as BackendMovement<Self, TF, TI>>::move_float(tensor)
+    }
+}
+
+pub struct Settings<F: Element, I: Element> {
+    _f: PhantomData<F>,
+    _i: PhantomData<I>,
+}
+
+pub trait BackendMovement<B: Backend, TF, TI>
+where
+    TF: Element,
+    TI: Element,
+{
+    type TargetBackend: Backend<FloatElem = TF, IntElem = TI>;
+
+    fn move_float<const D: usize>(tensor: FloatTensor<B, D>)
+        -> FloatTensor<Self::TargetBackend, D>;
+}
+
+pub fn a_function<B>(tensor: FloatTensor<B, 1>)
+where
+    B: Backend,
+    B: BackendMovement<B, f64, i64>,
+{
+    let tensor_f64 = <B as Backend>::move_float::<1, f64, i64>(tensor);
 }
 
 /// Trait that allows a backend to support autodiff.

@@ -2,7 +2,10 @@ use crate::element::FloatNdArrayElement;
 use crate::NdArrayTensor;
 use alloc::string::String;
 use burn_common::stub::Mutex;
-use burn_tensor::backend::Backend;
+use burn_tensor::{
+    backend::{Backend, BackendMovement},
+    Tensor,
+};
 use core::marker::PhantomData;
 use rand::{rngs::StdRng, SeedableRng};
 
@@ -19,6 +22,30 @@ impl Default for NdArrayDevice {
     fn default() -> Self {
         Self::Cpu
     }
+}
+
+struct NdArraySettings<F: FloatNdArrayElement> {
+    _float: PhantomData<F>,
+}
+
+impl<F: FloatNdArrayElement, TF: FloatNdArrayElement> BackendMovement<Self, TF, i32>
+    for NdArray<F>
+{
+    type TargetBackend = NdArray<TF>;
+
+    fn move_float<const D: usize>(
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self::TargetBackend, D> {
+        let array = tensor.array.mapv(|a| a.elem()).into_shared();
+        NdArrayTensor { array }
+    }
+}
+
+fn allo() {
+    let tensor: Tensor<NdArray<f32>, 2> = Tensor::ones([32, 32], &Default::default());
+    let tensor_full: Tensor<NdArray<f64>, 2> = tensor.clone().cast();
+
+    tensor + tensor_full.cast();
 }
 
 /// Tensor backend that uses the [ndarray](ndarray) crate for executing tensor operations.
@@ -39,7 +66,7 @@ impl<E: FloatNdArrayElement> Backend for NdArray<E> {
     type FloatElem = E;
 
     type IntTensorPrimitive<const D: usize> = NdArrayTensor<i64, D>;
-    type IntElem = i64;
+    type IntElem = i32;
 
     type BoolTensorPrimitive<const D: usize> = NdArrayTensor<bool, D>;
 

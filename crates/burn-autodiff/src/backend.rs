@@ -4,7 +4,10 @@ use crate::{
     graph::backward::backward,
     tensor::AutodiffTensor,
 };
-use burn_tensor::backend::{AutodiffBackend, Backend};
+use burn_tensor::{
+    backend::{AutodiffBackend, Backend, BackendMovement},
+    Element,
+};
 use core::marker::PhantomData;
 
 /// Enable auto-differentiation on a backend.
@@ -15,6 +18,22 @@ use core::marker::PhantomData;
 pub struct Autodiff<B, C = NoCheckpointing> {
     _b: PhantomData<B>,
     _checkpoint_strategy: PhantomData<C>,
+}
+
+impl<B, C, TF, TI> BackendMovement<Self, TF, TI> for Autodiff<B, C>
+where
+    B: Backend + BackendMovement<B, TF, TI>,
+    C: CheckpointStrategy,
+    TF: Element,
+    TI: Element,
+{
+    type TargetBackend = Autodiff<<B as BackendMovement<B, TF, TI>>::TargetBackend, C>;
+
+    fn move_float<const D: usize>(
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self::TargetBackend, D> {
+        todo!()
+    }
 }
 
 impl<B: Backend, C: CheckpointStrategy> Backend for Autodiff<B, C> {

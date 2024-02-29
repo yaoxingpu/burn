@@ -1,13 +1,14 @@
 use alloc::vec::Vec;
 use core::convert::TryInto;
 
-use crate::check;
+use crate::backend::BackendMovement;
 use crate::check::TensorCheck;
 use crate::tensor::backend::Backend;
 use crate::tensor::stats;
 use crate::tensor::{Data, Distribution, Shape};
 use crate::Int;
 use crate::Tensor;
+use crate::{check, Element};
 
 impl<const D: usize, B> Tensor<B, D>
 where
@@ -29,6 +30,18 @@ where
 
         let mut tensor_new = func(tensor_owned);
         core::mem::swap(&mut tensor_new, self);
+    }
+
+    /// Applies element wise exponential operation.
+    pub fn cast<F: Element, I: Element>(
+        self,
+    ) -> Tensor<<B as BackendMovement<B, F, I>>::TargetBackend, D>
+    where
+        B: BackendMovement<B, F, I>,
+    {
+        Tensor::from_primitive(<B as BackendMovement<B, F, I>>::move_float(
+            self.into_primitive(),
+        ))
     }
 
     /// Applies element wise exponential operation.

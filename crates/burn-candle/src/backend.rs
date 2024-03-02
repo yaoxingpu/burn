@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use burn_tensor::backend::Backend;
+use burn_tensor::backend::{Backend, BackendBridge, BackendPrecisionSettings};
 use candle_core::DeviceLocation;
 
 use crate::{
@@ -63,6 +63,26 @@ impl From<candle_core::Device> for CandleDevice {
 impl Default for CandleDevice {
     fn default() -> Self {
         Self::Cpu
+    }
+}
+
+impl<F: FloatCandleElement, I: IntCandleElement, TF: FloatCandleElement, TI: IntCandleElement>
+    BackendBridge<BackendPrecisionSettings<TF, TI>> for Candle<F, I>
+{
+    type InputBackend = Self;
+
+    type TargetBackend = Candle<TF, TI>;
+
+    fn bridge_float<const D: usize>(
+        tensor: burn_tensor::ops::FloatTensor<Self::InputBackend, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self::TargetBackend, D> {
+        todo!()
+    }
+
+    fn bridge_int<const D: usize>(
+        tensor: burn_tensor::ops::IntTensor<Self::InputBackend, D>,
+    ) -> burn_tensor::ops::IntTensor<Self::TargetBackend, D> {
+        todo!()
     }
 }
 

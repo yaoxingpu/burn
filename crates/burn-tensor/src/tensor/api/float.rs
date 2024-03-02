@@ -1,14 +1,14 @@
 use alloc::vec::Vec;
 use core::convert::TryInto;
 
-use crate::backend::BackendMovement;
+use crate::backend::{BackendBridge, BackendBridgeSettings};
+use crate::check;
 use crate::check::TensorCheck;
 use crate::tensor::backend::Backend;
 use crate::tensor::stats;
 use crate::tensor::{Data, Distribution, Shape};
 use crate::Int;
 use crate::Tensor;
-use crate::{check, Element};
 
 impl<const D: usize, B> Tensor<B, D>
 where
@@ -32,16 +32,15 @@ where
         core::mem::swap(&mut tensor_new, self);
     }
 
-    /// Applies element wise exponential operation.
-    pub fn cast<F: Element, I: Element>(
+    /// TODO
+    pub fn bridge<S: BackendBridgeSettings>(
         self,
-    ) -> Tensor<<B as BackendMovement<B, F, I>>::TargetBackend, D>
+        settings: S,
+    ) -> Tensor<<B as BackendBridge<S>>::TargetBackend, D>
     where
-        B: BackendMovement<B, F, I>,
+        B: BackendBridge<S, InputBackend = B>,
     {
-        Tensor::from_primitive(<B as BackendMovement<B, F, I>>::move_float(
-            self.into_primitive(),
-        ))
+        Tensor::from_primitive(B::bridge_float(self.into_primitive(), settings))
     }
 
     /// Applies element wise exponential operation.

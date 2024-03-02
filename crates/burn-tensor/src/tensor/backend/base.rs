@@ -64,7 +64,10 @@ pub trait Backend:
     + Sync
     + core::fmt::Debug
     + 'static
-    + BackendMovement<Self, f32, i32>
+    + BackendBridge<
+        BackendPrecisionSettings<Self::FullPrecisionElem, IntElem<Self>>,
+        InputBackend = Self,
+    >
 {
     /// Device type.
     type Device: Clone + Default + PartialEq + core::fmt::Debug + Send + Sync;
@@ -76,16 +79,18 @@ pub trait Backend:
 
     /// Tensor primitive to be used for all float operations.
     type FloatTensorPrimitive<const D: usize>: Clone + Send + Sync + 'static + core::fmt::Debug;
-    /// Float element type.
-    type FloatElem: Element;
 
     /// Tensor primitive to be used for all int operations.
     type IntTensorPrimitive<const D: usize>: Clone + Send + Sync + 'static + core::fmt::Debug;
-    /// Int element type.
-    type IntElem: Element;
 
     /// Tensor primitive to be used for all bool operations.
     type BoolTensorPrimitive<const D: usize>: Clone + Send + Sync + 'static + core::fmt::Debug;
+
+    /// Float element type.
+    type FloatElem: Element;
+
+    /// Int element type.
+    type IntElem: Element;
 
     /// If autodiff is enabled.
     fn ad_enabled() -> bool {
@@ -100,39 +105,84 @@ pub trait Backend:
 
     /// Sync the backend, ensure that all computation are finished.
     fn sync(_device: &Self::Device) {}
+}
 
-    fn move_float<const D: usize, TF: Element, TI: Element>(
-        tensor: FloatTensor<Self, D>,
-    ) -> FloatTensor<<Self as BackendMovement<Self, TF, TI>>::TargetBackend, D>
-    where
-        Self: BackendMovement<Self, TF, TI>,
-    {
-        <Self as BackendMovement<Self, TF, TI>>::move_float(tensor)
+pub type BackendPrecision<B: Backend> = BackendPrecisionSettings<FloatElem<B>, IntElem<B>>;
+
+pub type FullPrecision = BackendPrecisionSettings<f32, i32>;
+pub type DoublePrecision = BackendPrecisionSettings<f64, i64>;
+
+#[derive(Default)]
+pub struct BackendPrecisionSettings<F: Element, I: Element> {
+    _float: PhantomData<F>,
+    _int: PhantomData<I>,
+}
+
+pub trait BackendBridgeSettings {
+    type FloatElem: Element;
+    type IntElem: Element;
+}
+
+impl<F: Element, I: Element> BackendBridgeSettings for BackendPrecisionSettings<F, I> {
+    type FloatElem = F;
+    type IntElem = I;
+}
+
+pub trait BackendBridge<S: BackendBridgeSettings> {
+    type InputBackend: Backend;
+    type TargetBackend: Backend<FloatElem = S::FloatElem, IntElem = S::IntElem>;
+
+    fn bridge_float<const D: usize>(
+        tensor: FloatTensor<Self::InputBackend, D>,
+        settings: S,
+    ) -> FloatTensor<Self::TargetBackend, D>;
+    fn bridge_int<const D: usize>(
+        tensor: IntTensor<Self::InputBackend, D>,
+        settings: S,
+    ) -> IntTensor<Self::TargetBackend, D>;
+}
+
+
+
+impl<Target: Backend> BackendBridgeSettings for FromDataBackendBridge<Target> {
+    type FloatElem = FloatElem<Target>;
+    type IntElem = IntElem<Target>;
+}
+
+#[derive(new)]
+pub struct FromDataBackendBridge<Target: Backend> {
+    device: Device<Target>,
+    _b: PhantomData<Target>,
+}
+
+impl<Input: Backend, Target: Backend> BackendBridge<FromDataBackendBridge<Target>> for Input {
+    type InputBackend = Input;
+    type TargetBackend = Target;
+
+    fn bridge_float<const D: usize>(
+        tensor: FloatTensor<Self::InputBackend, D>,
+        settings: FromDataBackendBridge<Target>,
+    ) -> FloatTensor<Self::TargetBackend, D> {
+        let data = Input::float_into_data(tensor).read_sync().unwrap();
+        Target::float_from_data(data.convert(), &settings.device)
+    }
+
+    fn bridge_int<const D: usize>(
+        tensor: IntTensor<Self::InputBackend, D>,
+        settings: FromDataBackendBridge<Target>,
+    ) -> IntTensor<Self::TargetBackend, D> {
+        let data = Input::int_into_data(tensor).read_sync().unwrap();
+        Target::int_from_data(data.convert(), &settings.device)
     }
 }
 
-pub struct Settings<F: Element, I: Element> {
-    _f: PhantomData<F>,
-    _i: PhantomData<I>,
-}
-
-pub trait BackendMovement<B: Backend, TF, TI>
+pub fn a_function<B: Backend>(
+    tensor: FloatTensor<B, 1>,
+) -> FloatTensor<<B as BackendBridge<FullPrecision>>::TargetBackend, 1>
 where
-    TF: Element,
-    TI: Element,
+    B: BackendBridge<FullPrecision, InputBackend = B>,
 {
-    type TargetBackend: Backend<FloatElem = TF, IntElem = TI>;
-
-    fn move_float<const D: usize>(tensor: FloatTensor<B, D>)
-        -> FloatTensor<Self::TargetBackend, D>;
-}
-
-pub fn a_function<B>(tensor: FloatTensor<B, 1>)
-where
-    B: Backend,
-    B: BackendMovement<B, f64, i64>,
-{
-    let tensor_f64 = <B as Backend>::move_float::<1, f64, i64>(tensor);
+    B::bridge_float(tensor, FullPrecision::default())
 }
 
 /// Trait that allows a backend to support autodiff.

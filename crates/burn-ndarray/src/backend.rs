@@ -2,10 +2,7 @@ use crate::element::FloatNdArrayElement;
 use crate::NdArrayTensor;
 use alloc::string::String;
 use burn_common::stub::Mutex;
-use burn_tensor::{
-    backend::{Backend, BackendMovement},
-    Tensor,
-};
+use burn_tensor::{backend::{Backend, BackendBridge, BackendPrecisionSettings, DoublePrecision}, Tensor};
 use core::marker::PhantomData;
 use rand::{rngs::StdRng, SeedableRng};
 
@@ -24,28 +21,35 @@ impl Default for NdArrayDevice {
     }
 }
 
-struct NdArraySettings<F: FloatNdArrayElement> {
-    _float: PhantomData<F>,
-}
-
-impl<F: FloatNdArrayElement, TF: FloatNdArrayElement> BackendMovement<Self, TF, i32>
-    for NdArray<F>
+impl<F, TF> BackendBridge<BackendPrecisionSettings<TF, i64>> for NdArray<F>
+where
+    F: FloatNdArrayElement,
+    TF: FloatNdArrayElement,
 {
+    type InputBackend = Self;
     type TargetBackend = NdArray<TF>;
 
-    fn move_float<const D: usize>(
+    fn bridge_float<const D: usize>(
         tensor: burn_tensor::ops::FloatTensor<Self, D>,
+        _settings: BackendPrecisionSettings<TF, i64>,
     ) -> burn_tensor::ops::FloatTensor<Self::TargetBackend, D> {
         let array = tensor.array.mapv(|a| a.elem()).into_shared();
         NdArrayTensor { array }
     }
+
+    fn bridge_int<const D: usize>(
+        tensor: burn_tensor::ops::IntTensor<Self, D>,
+        _settings: BackendPrecisionSettings<TF, i64>,
+    ) -> burn_tensor::ops::IntTensor<Self::TargetBackend, D> {
+        let array = tensor.array;
+        NdArrayTensor { array }
+    }
 }
 
+#[allow(dead_code)]
 fn allo() {
-    let tensor: Tensor<NdArray<f32>, 2> = Tensor::ones([32, 32], &Default::default());
-    let tensor_full: Tensor<NdArray<f64>, 2> = tensor.clone().cast();
-
-    tensor + tensor_full.cast();
+    let tensor: Tensor<NdArray<f32>, 1> = Tensor::ones([32], &Default::default());
+    let tensor_full: Tensor<NdArray<f64>, 1> =  tensor.bridge(DoublePrecision::default());
 }
 
 /// Tensor backend that uses the [ndarray](ndarray) crate for executing tensor operations.
@@ -63,12 +67,11 @@ impl<E: FloatNdArrayElement> Backend for NdArray<E> {
     type FullPrecisionBackend = NdArray<f32>;
 
     type FloatTensorPrimitive<const D: usize> = NdArrayTensor<E, D>;
-    type FloatElem = E;
-
     type IntTensorPrimitive<const D: usize> = NdArrayTensor<i64, D>;
-    type IntElem = i32;
-
     type BoolTensorPrimitive<const D: usize> = NdArrayTensor<bool, D>;
+
+    type FloatElem = E;
+    type IntElem = i64;
 
     fn ad_enabled() -> bool {
         false

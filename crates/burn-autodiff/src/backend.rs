@@ -5,7 +5,7 @@ use crate::{
     tensor::AutodiffTensor,
 };
 use burn_tensor::{
-    backend::{AutodiffBackend, Backend, BackendMovement},
+    backend::{AutodiffBackend, Backend, BackendBridge, BackendPrecisionSettings},
     Element,
 };
 use core::marker::PhantomData;
@@ -20,18 +20,27 @@ pub struct Autodiff<B, C = NoCheckpointing> {
     _checkpoint_strategy: PhantomData<C>,
 }
 
-impl<B, C, TF, TI> BackendMovement<Self, TF, TI> for Autodiff<B, C>
+impl<B, C, TF: Element, TI: Element> BackendBridge<BackendPrecisionSettings<TF, TI>>
+    for Autodiff<B, C>
 where
-    B: Backend + BackendMovement<B, TF, TI>,
+    B: Backend + BackendBridge<BackendPrecisionSettings<TF, TI>>,
     C: CheckpointStrategy,
-    TF: Element,
-    TI: Element,
 {
-    type TargetBackend = Autodiff<<B as BackendMovement<B, TF, TI>>::TargetBackend, C>;
+    type InputBackend = Self;
+    type TargetBackend =
+        Autodiff<<B as BackendBridge<BackendPrecisionSettings<TF, TI>>>::TargetBackend, C>;
 
-    fn move_float<const D: usize>(
+    fn bridge_float<const D: usize>(
         tensor: burn_tensor::ops::FloatTensor<Self, D>,
+        settings: BackendPrecisionSettings<TF, TI>,
     ) -> burn_tensor::ops::FloatTensor<Self::TargetBackend, D> {
+        todo!()
+    }
+
+    fn bridge_int<const D: usize>(
+        tensor: burn_tensor::ops::IntTensor<Self, D>,
+        settings: BackendPrecisionSettings<TF, TI>,
+    ) -> burn_tensor::ops::IntTensor<Self::TargetBackend, D> {
         todo!()
     }
 }
@@ -42,12 +51,11 @@ impl<B: Backend, C: CheckpointStrategy> Backend for Autodiff<B, C> {
     type FullPrecisionElem = B::FullPrecisionElem;
     type FullPrecisionBackend = Autodiff<B::FullPrecisionBackend>;
 
-    type FloatTensorPrimitive<const D: usize> = AutodiffTensor<B, D>;
     type FloatElem = B::FloatElem;
-
-    type IntTensorPrimitive<const D: usize> = B::IntTensorPrimitive<D>;
     type IntElem = B::IntElem;
 
+    type FloatTensorPrimitive<const D: usize> = AutodiffTensor<B, D>;
+    type IntTensorPrimitive<const D: usize> = B::IntTensorPrimitive<D>;
     type BoolTensorPrimitive<const D: usize> = B::BoolTensorPrimitive<D>;
 
     fn ad_enabled() -> bool {
